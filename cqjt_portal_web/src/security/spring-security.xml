@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/security 
+         http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+           
+	<beans:bean id="loggerListener"
+		class="org.springframework.security.access.event.LoggerListener" />
+	
+	<http pattern="/common/**" security="none"/>
+	<http pattern="/resource/**" security="none"/>
+	<http pattern="/plugin/**" security="none"/>
+	<http pattern="/images/**" security="none"/>
+	<http pattern="/css/**" security="none"/>
+	<http pattern="/js/**" security="none"/>
+	<http pattern="/sso/**" security="none"/>
+
+	<http auto-config="true" access-denied-page="/common/403.jsp">
+		<intercept-url pattern="/guest/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<intercept-url pattern="/sso/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<intercept-url pattern="/web/**" access="IS_AUTHENTICATED_FULLY" />
+		<intercept-url pattern="/console/**" access="ROLE_CONSOLE" />
+		<!-- 登录页面为/login.jsp，登录成功页面为/index.jsp，且总是用这个页面为登录成功页面 -->
+		<form-login login-page="/" default-target-url="/web/index.xhtml?face=home"
+			authentication-failure-url="/guest/index.xhtml?error=error" />
+		<logout invalidate-session="true" logout-success-url="/guest/index.xhtml" />
+		<!-- session管理，防止重复登录，同一用户第二次登录会让第一次登录失效 -->
+		<session-management invalid-session-url="/guest/index.xhtml">
+			<concurrency-control max-sessions="1"
+				error-if-maximum-exceeded="true" />
+		</session-management>
+	</http>
+
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider user-service-ref="securityManager">			
+			<password-encoder hash="sha-256" base64="true">
+				<!-- <salt-source user-property="username" /> -->
+			</password-encoder>			
+		</authentication-provider>
+	</authentication-manager>
+	<!-- 
+	<beans:bean id="accessDecisionManager"
+		class="org.springframework.security.access.vote.AffirmativeBased">
+		<beans:property name="allowIfAllAbstainDecisions"
+			value="false" />
+		<beans:property name="decisionVoters">
+			<beans:list>
+				<beans:bean class="org.springframework.security.access.vote.RoleVoter" />
+				<beans:bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+	 -->
+</beans:beans>

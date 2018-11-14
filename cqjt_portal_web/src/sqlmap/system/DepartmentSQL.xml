@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--新增Department.sql-->
+<sqlMap namespace="Dept">
+	<!--部门下拉列表 H2602965 2014.05.30-->
+	<select id="getDeptAll" parameterClass="String" resultClass="Dept">
+		select dept_id as deptID,dept_name as deptName,dept_category as deptCategory from sys_department 
+		where is_del='0' order by sequence_Num asc
+	</select>
+	
+   <select id="getCategorys" parameterClass="String" resultClass="textCategory">
+		select a.category_id as categoryId, a.category_name as categoryName, 
+		  a.outsite_program as outsiteProgram
+		from text_category a, text_dept_category b
+		where a.category_id=b.category_id and b.dept_id=#deptID# and B.IS_DEL=0
+	</select>
+	<select id="getSumList" parameterClass="Map" resultClass="Dept">
+			select dept_id as deptID,dept_name as deptName,dept_category as deptCategory,score_site as scoreSite,
+			score_gov as scoreGov ,SCORE_SITE_TOTAL as scoreSiteTotal ,SCORE_GOV_TOTAL as scoreGovTotal ,  
+			SCORE_SITE_YEAR as  scoreSiteYear,SCORE_GOV_YEAR as scoreGovYear  ,SCORE_SITE_YEAR_TOTAL as scoreSiteYearTotal, 
+			SCORE_GOV_YEAR_TOTAL as scoreGovYearTotal
+			from sys_department where is_del='0' and FLAG='0'
+		<dynamic>
+		   <isNotEmpty prepend="and" property="deptCategory">
+		     <iterate property="deptCategory" open="(" close=")" conjunction="or">
+				  dept_category=#deptCategory[]#
+		      </iterate>
+		   </isNotEmpty>
+	   </dynamic> 
+			order by sequence_Num asc
+    </select>
+    <!-- 獲取部門名稱和部門分類 H2602965 20140704-->
+    <select id ="getDeptCategory" parameterClass="Map" resultClass="Dept">
+    	  select distinct dept_Name as deptName,dept_id as deptID ,dept_category  as deptCategory from sys_department 
+    	  where is_del ='0' 
+    	  <dynamic>
+    	  	<isNotEmpty prepend="and" property="deptCategory">
+		     dept_category like '%'||decode(#deptCategory#,'',dept_category,#deptCategory#)||'%'
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="deptName">
+		     dept_Name like '%'||decode(#deptName#,'',dept_Name,#deptName#)||'%'
+		   </isNotEmpty>
+    	  </dynamic>
+    	   order by sequence_Num asc
+    </select>    	
+   <!-- 獲取栏目名称  H2602965 20140707-->
+   <select id ="getCategoryName" parameterClass="String" resultClass="Dept">
+   	select a.category_id as categoryId, b.dc_id as dcid,a.category_name as categoryName,b.dept_id as deptID,c.dept_name deptName,c.dept_category,
+          a.outsite_program as outsiteProgram
+        from text_category a, text_dept_category b,sys_department c
+	 where a.category_id=b.category_id and c.dept_id=b.dept_id and b.is_del ='0' and b.dept_id=#deptID#
+   	order by categoryName asc
+   </select>
+<!--     wcf 20140707 部门管理按条件查询 -->
+    <select id="getDeptInfo" parameterClass="Map" resultClass="Dept">
+			select dept_id as deptId,dept_name as deptName,dept_category as deptCategory,SEQUENCE_NUM as sequenceNum,
+			create_date as createDate,is_del as isDel,flag
+			from sys_department where is_del=0 
+		<dynamic>
+		   <isNotEmpty prepend="and" property="deptID">
+		     dept_id like '%'||decode(#deptID#,'',dept_id,#deptID#)||'%'
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="deptName">
+		  	dept_name like '%'||decode(#deptName#,'',dept_name,#deptName#)||'%'
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="deptCategory">
+		  	dept_category like '%'||decode(#deptCategory#,'',dept_category,#deptCategory#)||'%'
+		   </isNotEmpty>
+	   </dynamic> 
+			order by sequenceNum asc
+    </select>
+    <!-- wcf 20140708删除部门（软删除） -->
+    <delete id="deleteDepartment" parameterClass="java.lang.String">
+   	update sys_department set is_del=1 where dept_id = #deptID#
+   </delete>
+	   <!--wcf 20140708 设置部门启用、停用状态 -->
+   <delete id="updateDepartment" parameterClass="java.lang.String">
+   	update sys_department set flag=decode(flag,'1','0','1') where dept_id = #deptID#
+   </delete>
+    <!-- 栏目下拉列表 H2602965 20140707-->
+    <select id="getCategorySelect" parameterClass="String" resultClass="textCategory">
+		select CATEGORY_ID as categoryId,CATEGORY_NAME as categoryName from text_category where IS_DEL='0'
+	</select>
+	<!-- 栏目部门对应表,用于删除 H2602965-->
+	<update id="deleteCategoryDept"  parameterClass="Dept">
+    	update text_dept_category set 
+    		 	is_del=#isDel#
+    		 where category_id=#categoryId# and dept_id=#deptID#
+   </update>
+   <!-- 栏目部门对应表,更新保存 H2602965-->
+   	<update id="updateCategoryDept"  parameterClass="Dept">
+    	update text_dept_category set 
+	   	is_del='0',
+	   	dept_id=#deptID#,
+	   	category_id=#categoryId#
+    	where dc_id=#dcId#
+   </update>
+   <!-- 根据栏目ID查询部门ID删除使用 H2602965-->
+   <select id="getDeptId" parameterClass="java.lang.Long" resultClass="textCategory">
+   	select category_id AS categoryId,dept_id as deptID  from text_dept_category
+	where is_del='0' and category_id=#categoryId#
+   </select>
+   
+   <!--部门栏目表插入数据 H2602965-->
+    <insert id="addColumn" parameterClass="Dept" >
+		insert into TEXT_DEPT_CATEGORY 
+		(DC_ID,Dept_ID,CATEGORY_ID,is_del)
+		values
+		(SQ_TEXT_DEPT_CATEGORY.NEXTVAL,#deptID#,#categoryId#,#isDel#)
+	</insert>
+	<!-- wcf 部门新增功能插入数据 -->
+   <insert id="insertDepartment" parameterClass="Dept">
+   	insert into sys_department(
+   	  dept_id,dept_name,dept_category,is_del,flag,create_date,create_userno,SEQUENCE_NUM
+	) values (
+	  sq_sys_department.NEXTVAL,#deptName#,#deptCategory#,#isDel#,#flag#,to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'),#createUserNo#,#sequenceNum#
+	) 
+   </insert>
+	
+	<!--获取部门栏目详细信息,用于编辑H2602965-->
+	<select id="getCategoryDeptDetail" parameterClass="Map" resultClass="Dept">
+		  SELECT a.category_id AS categoryId,
+		   b.dept_id as deptID,
+		   b.dc_id as dcId,
+         a.category_name AS categoryName,
+         c.dept_name deptName,
+         c.dept_category,
+         a.outsite_program AS outsiteProgram
+    FROM text_category a, text_dept_category b, sys_department c
+   WHERE     a.category_id = b.category_id
+         AND c.dept_id = b.dept_id
+         AND b.is_del = '0'
+         <dynamic>
+         	<isNotEmpty prepend="and" property="deptID">
+         		b.dept_id=#deptID#
+         	</isNotEmpty>
+         	<isNotEmpty prepend="and" property="categoryId">
+         		b.CATEGORY_ID=#categoryId#
+         	</isNotEmpty>
+         </dynamic>
+	</select>
+   <!-- wcf 部门管理编辑保存后更新数据 -->
+		<update id="updateDeptInfo" parameterClass="Dept">
+			update sys_department 
+			set 
+			<dynamic>
+			   <isNotEmpty  property="isDel">
+				 	is_del=#isDel#
+			   </isNotEmpty> 
+			   <isEmpty  property="isDel">
+				   	dept_name=#deptName#,
+					dept_category=#deptCategory#,
+					flag = #flag#,
+					update_date=to_date(#updateDate#,'yyyy-MM-dd hh24:mi:ss'),
+					update_userno=#updateUserNo#,
+					SEQUENCE_NUM=#sequenceNum#
+			   </isEmpty>
+			</dynamic>
+			where dept_id=#deptID#
+		</update>
+   <!--根据部门ID查询部门 新增使用H2602965-->
+   <select  id="getDeptName" parameterClass="Integer" resultClass="Dept">
+   	SELECT distinct DEPT_NAME as deptName,Dept_ID as deptID FROM SYS_DEPARTMENT where  dept_id=#deptID#
+   </select>
+   <!--根据部门Id查询  未新增部门与栏目对应关系 H2602965-->
+    <select  id="getColunmDeptUnInfo" parameterClass="Map" resultClass="Dept">
+	   select a.CATEGORY_ID categoryId,CATEGORY_NAME categoryName,
+	   to_char(CREATE_DATE,'yyyy-MM-dd hh24:mi:ss') as createDate,CREATE_BY createUserNo from TEXT_CATEGORY a
+		where a.CATEGORY_ID not in(select b.CATEGORY_ID from TEXT_DEPT_CATEGORY b where DEPT_ID=#deptID# and b.is_del='0')
+		 and A.IS_DEL = 0
+		<dynamic>
+         	<isNotEmpty prepend="and" property="categoryName">
+         		CATEGORY_NAME like '%'||decode(#categoryName#,'',CATEGORY_NAME,#categoryName#)||'%'
+         	</isNotEmpty>
+         	 <isNotEmpty prepend="and" property="startDate">
+		      	 create_date >=#startDate#
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="endDate">
+			     create_date  
+			     <![CDATA[  <=#endDate#]]>
+			   </isNotEmpty>
+         </dynamic>
+		order by categoryId
+   </select>
+   
+   <select id="queryCategory" resultClass="Dept">
+   		SELECT DISTINCT dept_category as deptCategory FROM SYS_DEPARTMENT where IS_DEL='0'
+   </select>
+   
+   <!--只更新部门表SCORE_GOV和SCORE_SITE用于考核后将考核分数存入sys_department中H2602965-->
+   <update id="updateDept" parameterClass="Dept">
+			update sys_department 
+			set 
+			flag = #flag#,
+			update_date=to_date(#updateDate#,'yyyy-MM-dd hh24:mi:ss'),
+			update_userno=#updateUserNo#,
+				<dynamic>
+				<isNotEmpty  property="scoreSite">
+					SCORE_SITE=#scoreSite#
+				</isNotEmpty>
+			</dynamic>
+			<dynamic>
+				<isNotEmpty  property="scoreGov">
+					SCORE_GOV=#scoreGov#
+				</isNotEmpty>
+			</dynamic>
+			<dynamic>
+				<isNotEmpty  property="scoreSiteYear">
+					SCORE_SITE_YEAR=#scoreSiteYear#
+				</isNotEmpty>
+			</dynamic>
+			<dynamic>
+				<isNotEmpty  property="scoreGovYear">
+					SCORE_GOV_YEAR=#scoreGovYear#
+				</isNotEmpty>
+			</dynamic>
+			where dept_id=#deptID#
+		</update>
+		
+	<!--只更新部门表SCORE_GOV_Year和SCORE_SITE_Year、SCORE_GOV_Year_total、SCORE_SITE_Year_total用于考核后将考核分数存入sys_department中H2602965-->
+   <update id="updateDeptTotal" parameterClass="Dept">
+			update sys_department asd
+			set 
+			flag = #flag#,
+			update_date=to_date(#updateDate#,'yyyy-MM-dd hh24:mi:ss'),
+			update_userno=#updateUserNo#,
+				<dynamic>
+				<isNotEmpty  property="scoreSiteYearTotal">
+					SCORE_SITE_YEAR_TOTAL=#scoreSiteYearTotal#
+				</isNotEmpty>
+			</dynamic>
+			<dynamic>
+				<isNotEmpty  property="scoreGovYearTotal">
+					SCORE_GOV_YEAR_TOTAL=#scoreGovYearTotal#
+				</isNotEmpty>
+			</dynamic>
+			<dynamic>
+				<isNotEmpty  property="scoreSiteYear">
+					SCORE_SITE_YEAR=#scoreSiteYear#
+				</isNotEmpty>
+			</dynamic>
+			<dynamic>
+				<isNotEmpty  property="scoreGovYear">
+					SCORE_GOV_YEAR=#scoreGovYear#
+				</isNotEmpty>
+			</dynamic>
+			<dynamic>
+				<isNotEmpty  property="scoreSiteTotal">
+					SCORE_SITE_TOTAL=#scoreSiteTotal#
+				</isNotEmpty>
+			</dynamic>
+			<dynamic>
+				<isNotEmpty  property="scoreGovTotal">
+					SCORE_GOV_TOTAL=#scoreGovTotal#
+				</isNotEmpty>
+			</dynamic>
+			where dept_name=#deptName#
+		</update>
+</sqlMap>

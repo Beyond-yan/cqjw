@@ -1,0 +1,581 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+ PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+ "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="TextGovInfo">
+  <!--政务信息采编 -->	
+   <insert id="insertTextGovInfo" parameterClass="TextGovInfo">
+   	insert into text_gov_info(
+   	  gi_id, news_id, gi_title, 
+	  gi_content, adopt_type,
+	  entry_user, entry_date, entry_dept, 
+	  create_by, create_date, 
+	  sequence_num, is_del, 
+	  pub_id,pub_type,is_report,report_type,news_author,merge_id
+	) values (
+	  #giId#,#newsId#,#giTitle#,
+	  #giContent#,','||#adoptType#||',',
+	  #entryUser#,#entryDate#,#entryDept#,
+	  #createBy#,to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'),0,
+	  #isDel#,#pubId#,#pubType#,#isReport#,','||#reportType#||',',#newsAuthor#,#mergeId#
+	) 
+   </insert>
+       <!--政务信息查询 -->	
+   <select id="getTextGovInfoList"  parameterClass="Map"  resultClass="TextGovInfo">
+	   select gi_id as giId, news_id as newsId, gi_title as giTitle,gi_content as giContent, 
+	      adopt_type as adoptType, entry_user as entryUser,
+	      entry_date as entryDate, entry_dept as entryDept, 
+		  to_char(create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, create_by as createBy,
+		  sequence_num as sequenceNum,is_del as isDel,pub_id as pubId, pub_type as pubType,
+		  is_report as isReport, report_type as reportType ,news_author as newsAuthor
+	    from text_gov_info where is_del=#isDel#
+	   <dynamic>
+		   <isNotEmpty prepend="and" property="newsTitle">
+			 gi_title like '%'||decode(#newsTitle#,'',gi_title,#newsTitle#)||'%'	
+		   </isNotEmpty>
+		    <isNotEmpty prepend="and" property="entryDateS">
+		      create_date >= #entryDateS#
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="entryDateE">
+		      create_date  
+		      <![CDATA[  <= #entryDateE#]]>
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="status">
+		   	report_type like '%'||decode(#status#,'',report_type,#status#)||'%'
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="isReport">
+			  <iterate property="isReport" open="(" close=")" conjunction="or">
+				  is_report=#isReport[]#
+		      </iterate> 
+		   </isNotEmpty>
+	   </dynamic> 
+	   order by createDate desc nulls last
+   </select>
+   
+   <select id="getTextGovInfo"  parameterClass="java.lang.String"  resultClass="TextGovInfo">
+	   select gi_id as giId, news_id as newsId, gi_title as giTitle,gi_content as giContent, 
+	      adopt_type as adoptType, entry_user as entryUser,
+	      entry_date as entryDate, entry_dept as entryDept, 
+		  to_char(create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, create_by as createBy,
+		  sequence_num as sequenceNum,is_del as isDel,pub_id as pubId, pub_type as pubType,
+		  is_report as isReport, report_type as reportType,news_author as newsAuthor,merge_id as mergeId
+	    from text_gov_info where gi_id=#giId#
+   </select>
+   
+   <!--政务信息上报管理编辑模块 初始化显示功能 H2602965 汪磊 2014.06.05-->	
+  <select id="getTextGovInfoByNewsId"  parameterClass="java.lang.String"   resultClass="TextGovInfo">
+	   select gi_id as giId, news_id as newsId, gi_title as giTitle,gi_content as giContent, 
+	      adopt_type as adoptType, entry_user as entryUser,
+	      entry_date as entryDate, entry_dept as entryDept, 
+		  to_char(create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, create_by as createBy,
+		  sequence_num as sequenceNum,is_del as isDel,pub_id as pubId, pub_type as pubType,
+		  is_report as isReport, report_type as reportType,news_author as newsAuthor,merge_id as mergeId
+	    from text_gov_info where is_del='0' and news_id=#newsId#
+   </select>
+   <select id="getTextGovInfoListByNewsId"  parameterClass="java.lang.String"   resultClass="TextGovInfo">
+	   select gi_id as giId, news_id as newsId, gi_title as giTitle,gi_content as giContent, 
+	      adopt_type as adoptType, entry_user as entryUser,
+	      entry_date as entryDate, entry_dept as entryDept, 
+		  to_char(create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, create_by as createBy,
+		  sequence_num as sequenceNum,is_del as isDel,pub_id as pubId, pub_type as pubType,
+		  is_report as isReport, report_type as reportType,news_author as newsAuthor,merge_id as mergeId
+	    from text_gov_info where is_del='1' and news_id=#newsId#
+   </select>
+   
+    <!--政务信息上报管理编辑模块  update更新 H2602965 2014.06.05  --> 	
+   <update id="updateInfoReport" parameterClass="TextGovInfo">
+    update text_gov_info set 
+        gi_title=#giTitle#,
+        gi_content=#giContent#,
+        adopt_type=','||#adoptType#||',',
+        entry_user=#entryUser#, 
+        entry_date=#entryDate#,
+        entry_dept=#entryDept#, 
+        create_date=to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'), 
+        create_by=#createBy#, 
+        sequence_num=#sequenceNum#,
+        is_del='0',
+        pub_id=#pubId#,
+        pub_type =#pubType# ,
+        is_report=#isReport#,
+        report_type=','||#reportType#||',',
+        merge_id=#mergeId#,
+        news_author=#newsAuthor#
+        where news_id=#newsId#
+   </update>
+   
+	<!-- 政务信息上报删除功能，把is_del字段设置为1 H2902992 20140606 -->
+   <update id="deleteInfoReport" parameterClass="TextGovInfo">
+    update text_gov_info set is_del='1' where gi_id=#giId#
+   </update>
+   
+   <!-- 刊物编辑功能用pubId和pubType进行查询-->
+   <select id="getGovByIdAndTyep"  parameterClass="Map"  resultClass="TextGovInfo">
+	   select gi_id as giId, news_id as newsId, gi_title as giTitle,gi_content as giContent, 
+	      adopt_type as adoptType, entry_user as entryUser,
+	      entry_date as entryDate, entry_dept as entryDept, 
+		  to_char(create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, create_by as createBy,
+		  sequence_num as sequenceNum,is_del as isDel,pub_id as pubId, pub_type as pubType,
+		  is_report as isReport, report_type as reportType, news_author as newsAuthor
+	      from text_gov_info where is_del = 0 
+	   <dynamic>
+		   <isNotEmpty prepend="and" property="pubId">
+			  pub_id like '%'||decode(#pubId#,'',pub_id,#pubId#)||'%'
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="pubType">
+		      pub_type like '%'||decode(#pubType#,'',pub_type,#pubType#)||'%'
+		   </isNotEmpty>
+	   </dynamic> 
+	   order by sequence_num asc nulls last<!--create_date desc nulls last-->
+   </select> 
+	
+    <!-- 更新sequenceNum-->
+   <update id="updateSequenceNum" parameterClass="Map">
+        update text_gov_info set sequence_num = TO_NUMBER(#sequenceNum#)
+        where   gi_id = #giId#
+   </update>
+   
+   <select id="getUnPubTextGovInfoList"  parameterClass="Map"  resultClass="TextGovInfo">
+	   select gi_id as giId, news_id as newsId, gi_title as giTitle,gi_content as giContent, 
+	      adopt_type as adoptType, entry_user as entryUser,
+	      entry_date as entryDate, entry_dept as entryDept, 
+		  to_char(create_date,'yyyy-MM-dd hh24:mi') as createDate, create_by as createBy,
+		  sequence_num as sequenceNum,is_del as isDel,pub_id as pubId, pub_type as pubType,
+		  is_report as isReport, report_type as reportType ,news_author as newsAuthor
+	    from text_gov_info where is_del=0 and nvl(pub_id,' ')=' '
+	   <dynamic>
+		   <isNotEmpty prepend="and" property="titleKey">
+			 gi_title like '%'||decode(#titleKey#,'',gi_title,#titleKey#)||'%'	
+		   </isNotEmpty>
+		    <isNotEmpty prepend="and" property="startDate">
+		      create_date >=#startDate#
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="endDate">
+		      create_date <![CDATA[ <=#endDate# ]]>
+		   </isNotEmpty>
+	   </dynamic> 
+	   order by entry_date desc nulls last
+   </select>
+   <!--用于政务信息报表 -->
+   <select id="getGovReport"  parameterClass="Map"  resultClass="textGovReport">
+		SELECT   aa.dept_category as deptCategory, aa.dept_name as deptName,aa.sequenceNum as sequenceNum , 
+				 aa.shangb as shangb, bb.caiy as caiy, da.meiri as daily,
+		         sj.zuanti as subject, tf.jiaotong as traffic, ci.shiwei as cityCom, 
+		         cg.shifu as cityGov, cc.shiweip as comLeader, gg.shifup as govLeader,
+		         tt.jtbp as trafLeader
+		    FROM (SELECT   c.dept_category, c.dept_name, COUNT (news_title) AS shangb,c.sequence_num as sequenceNum
+		              FROM ((SELECT s.dept_category, s.dept_name, m.news_title
+		                       FROM sys_department s LEFT OUTER JOIN text_news m
+		                            ON s.DEPT_ID = m.ENTRY_DEPT
+		                      WHERE s.is_del = '0'
+		                        AND m.is_del = '0'
+		                        AND m.news_tags LIKE '%Gov%'
+		                        AND m.flag != '0'
+		                        <dynamic>
+		                        	<isNotEmpty prepend="and" property="startDate">
+		                        	  m.create_date >=#startDate#
+		                        	</isNotEmpty>
+		                        	<isNotEmpty prepend="and" property="endDate">
+		                              m.create_date <![CDATA[ <=#endDate# ]]>
+		                        	</isNotEmpty>
+		                        </dynamic>) b
+		                   RIGHT JOIN
+		                   (SELECT dept_name, dept_category,sequence_num
+		                      FROM sys_department s
+		                     WHERE s.is_del = '0'
+		                     <dynamic>
+		                     	<isNotEmpty prepend="and" property="status">
+		                     		s.dept_category like '%'||decode(#status#,'',s.dept_category,#status#)||'%'
+		                     	</isNotEmpty>
+		                     </dynamic>) c ON b.dept_name = c.dept_name)
+		          GROUP BY c.dept_name, c.dept_category,c.sequence_num) aa
+		         JOIN
+		         (SELECT   cc.dept_category, cc.dept_name, COUNT (gi_title) AS caiy,sequenceNum
+		              FROM ((SELECT s.dept_category, s.dept_name, t.gi_title,s.sequence_num as sequenceNum
+		                       FROM sys_department s LEFT OUTER JOIN text_gov_info t
+		                            ON t.entry_dept like s.dept_name||'%'
+		                      WHERE s.is_del = '0' AND t.is_del = '0' and <![CDATA[  t.adopt_type <> ',,' ]]>
+		                      	<dynamic>
+		                        	<isNotEmpty prepend="and" property="startDate">
+		                        	  t.entry_date >=#startDate#
+		                        	</isNotEmpty>
+		                        	<isNotEmpty prepend="and" property="endDate">
+		                              t.entry_date <![CDATA[ <=#endDate# ]]>
+		                        	</isNotEmpty>
+		                        </dynamic>) bb
+		                   RIGHT JOIN
+		                   (SELECT dept_name, dept_category
+		                      FROM sys_department s
+		                     WHERE s.is_del = '0'
+		                     <dynamic>
+		                     	<isNotEmpty prepend="and" property="status">
+		                     		s.dept_category like '%'||decode(#status#,'',s.dept_category,#status#)||'%'
+		                     	</isNotEmpty>
+		                     </dynamic>) cc ON bb.dept_name = cc.dept_name)
+		          GROUP BY cc.dept_name, cc.dept_category,sequenceNum) bb
+		         ON aa.dept_name = bb.dept_name
+		         LEFT JOIN
+		         (select S.DEPT_NAME, COUNT (S.DEPT_NAME) AS   meiri  
+			              FROM sys_department s
+					         LEFT OUTER JOIN text_gov_info t
+					            ON t.entry_dept LIKE s.dept_name || '%'
+			             WHERE t.adopt_type LIKE '%daily%' AND t.is_del = '0'
+			             	<dynamic>
+	                        	<isNotEmpty prepend="and" property="startDate">
+	                        	  t.entry_date >=#startDate#
+	                        	</isNotEmpty>
+	                        	<isNotEmpty prepend="and" property="endDate">
+	                              t.entry_date <![CDATA[ <=#endDate# ]]>
+	                        	</isNotEmpty>
+	                        </dynamic>
+			          GROUP BY S.DEPT_NAME
+		          ) da ON aa.dept_name = da.DEPT_NAME
+		          LEFT JOIN
+		         (select S.DEPT_NAME, COUNT (S.DEPT_NAME) AS zuanti  
+			              FROM sys_department s
+					         LEFT OUTER JOIN text_gov_info t
+					            ON t.entry_dept LIKE s.dept_name || '%'
+			             WHERE t.adopt_type LIKE '%subject%' AND t.is_del = '0'
+			             	<dynamic>
+	                        	<isNotEmpty prepend="and" property="startDate">
+	                        	  t.entry_date >=#startDate#
+	                        	</isNotEmpty>
+	                        	<isNotEmpty prepend="and" property="endDate">
+	                              t.entry_date <![CDATA[ <=#endDate# ]]>
+	                        	</isNotEmpty>
+	                        </dynamic>
+			          GROUP BY S.DEPT_NAME
+		          ) sj ON aa.dept_name = sj.DEPT_NAME
+		          LEFT JOIN
+		         (select S.DEPT_NAME, COUNT (S.DEPT_NAME) AS   jiaotong  
+			              FROM sys_department s
+					         LEFT OUTER JOIN text_gov_info t
+					            ON t.entry_dept LIKE s.dept_name || '%'
+			             WHERE t.adopt_type LIKE '%traffic%' AND t.is_del = '0'
+			             	<dynamic>
+	                        	<isNotEmpty prepend="and" property="startDate">
+	                        	  t.entry_date >=#startDate#
+	                        	</isNotEmpty>
+	                        	<isNotEmpty prepend="and" property="endDate">
+	                              t.entry_date <![CDATA[ <=#endDate# ]]>
+	                        	</isNotEmpty>
+	                        </dynamic>
+			          GROUP BY S.DEPT_NAME
+		          ) tf ON aa.dept_name = tf.DEPT_NAME
+		          LEFT JOIN
+		         (select S.DEPT_NAME, COUNT (S.DEPT_NAME) AS  shiwei  
+			              FROM sys_department s
+					         LEFT OUTER JOIN text_gov_info t
+					            ON t.entry_dept LIKE s.dept_name || '%'
+			             WHERE t.adopt_type LIKE '%cityCom%' AND t.is_del = '0'
+			             	<dynamic>
+	                        	<isNotEmpty prepend="and" property="startDate">
+	                        	  t.entry_date >=#startDate#
+	                        	</isNotEmpty>
+	                        	<isNotEmpty prepend="and" property="endDate">
+	                              t.entry_date <![CDATA[ <=#endDate# ]]>
+	                        	</isNotEmpty>
+	                        </dynamic>
+			          GROUP BY S.DEPT_NAME
+		          ) ci ON aa.dept_name = ci.DEPT_NAME
+		          LEFT JOIN
+		         (select S.DEPT_NAME, COUNT (S.DEPT_NAME) AS   shifu  
+			              FROM sys_department s
+					         LEFT OUTER JOIN text_gov_info t
+					            ON t.entry_dept LIKE s.dept_name || '%'
+			             WHERE t.adopt_type LIKE '%cityGov%' AND t.is_del = '0'
+			             	<dynamic>
+	                        	<isNotEmpty prepend="and" property="startDate">
+	                        	  t.entry_date >=#startDate#
+	                        	</isNotEmpty>
+	                        	<isNotEmpty prepend="and" property="endDate">
+	                              t.entry_date <![CDATA[ <=#endDate# ]]>
+	                        	</isNotEmpty>
+	                        </dynamic>
+			          GROUP BY S.DEPT_NAME
+		          ) cg ON aa.dept_name = cg.DEPT_NAME
+		          LEFT JOIN
+		         (select S.DEPT_NAME, COUNT (S.DEPT_NAME) AS   shiweip  
+			              FROM sys_department s
+					         LEFT OUTER JOIN text_gov_info t
+					            ON t.entry_dept LIKE s.dept_name || '%'
+			             WHERE t.adopt_type LIKE '%comLeader%' AND t.is_del = '0'
+			             	<dynamic>
+	                        	<isNotEmpty prepend="and" property="startDate">
+	                        	  t.entry_date >=#startDate#
+	                        	</isNotEmpty>
+	                        	<isNotEmpty prepend="and" property="endDate">
+	                              t.entry_date <![CDATA[ <=#endDate# ]]>
+	                        	</isNotEmpty>
+	                        </dynamic>
+			          GROUP BY S.DEPT_NAME
+		          ) cc ON aa.dept_name = cc.DEPT_NAME
+		          LEFT JOIN
+		         (select S.DEPT_NAME, COUNT (S.DEPT_NAME) AS  shifup  
+			              FROM sys_department s
+					         LEFT OUTER JOIN text_gov_info t
+					            ON t.entry_dept LIKE s.dept_name || '%'
+			             WHERE t.adopt_type LIKE '%govLeader%' AND t.is_del = '0'
+			             	<dynamic>
+	                        	<isNotEmpty prepend="and" property="startDate">
+	                        	  t.entry_date >=#startDate#
+	                        	</isNotEmpty>
+	                        	<isNotEmpty prepend="and" property="endDate">
+	                              t.entry_date <![CDATA[ <=#endDate# ]]>
+	                        	</isNotEmpty>
+	                        </dynamic>
+			          GROUP BY S.DEPT_NAME
+		          ) gg ON aa.dept_name = gg.DEPT_NAME
+		          LEFT JOIN
+		         (select S.DEPT_NAME, COUNT (S.DEPT_NAME) AS  jtbp  
+			              FROM sys_department s
+					         LEFT OUTER JOIN text_gov_info t
+					            ON t.entry_dept LIKE s.dept_name || '%'
+			             WHERE t.adopt_type LIKE '%trafLeader%' AND t.is_del = '0'
+			             	<dynamic>
+	                        	<isNotEmpty prepend="and" property="startDate">
+	                        	  t.entry_date >=#startDate#
+	                        	</isNotEmpty>
+	                        	<isNotEmpty prepend="and" property="endDate">
+	                              t.entry_date <![CDATA[ <=#endDate# ]]>
+	                        	</isNotEmpty>
+	                        </dynamic>
+			          GROUP BY S.DEPT_NAME
+		          ) tt ON aa.dept_name = tt.DEPT_NAME
+		ORDER BY  aa.sequenceNum asc
+   </select>
+   
+   <!--刊物编辑对应政务信息删除   gyf 2014.07.23  --> 	
+   <update id="deleteGovPubRef" parameterClass="TextGovInfo">
+    update text_gov_info set 
+        pub_id=#pubId#,
+        pub_type =#pubType# 
+        where gi_id = #giId#
+   </update>
+   <!-- 回收站复原功能，把is_del字段设置为0 H601917 20140728 -->
+   <update id="reUpdate" parameterClass="TextGovInfo">
+    update text_gov_info set is_del='0' where gi_id=#giId#
+   </update>
+   <!--彻底删除   2014.09.03 -->
+    <delete id="deleteTextNews" parameterClass="TextGovInfo">
+   	delete from text_gov_info where news_id = #newsId#
+   </delete>
+   <!--彻底删除   2014.09.03 -->
+    <delete id="delGovInfo" parameterClass="String">
+   	delete from text_gov_info where news_id = #newsId#
+   </delete>
+    <delete id="delGovInfoById" parameterClass="String">
+   	delete from text_gov_info where gi_id = #id#
+   </delete>
+    <!--获取政务信息 2014.09.04 --> 
+     <select id="getTextGov"  parameterClass="java.lang.String"  resultClass="TextGovInfo">
+	   select *  from text_gov_info where news_id = #newsId#
+   </select>
+   <!--获取政务信息 2014.09.04 连接刊物表和政务信息表--> 
+     <select id="getGov"  parameterClass="java.lang.String"  resultClass="TextGovInfo">
+     select news_id as NewsId  from text_gov_info  
+	   where pub_id =#pubId# and is_del ='0'
+     </select>
+       <select id="getTextInfo"  parameterClass="java.lang.String"  resultClass="TextGovInfo">
+	   select gi_id as giId, news_id as newsId, gi_title as giTitle,gi_content as giContent, 
+	      adopt_type as adoptType, entry_user as entryUser,
+	      entry_date as entryDate, entry_dept as entryDept, 
+		  to_char(create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, create_by as createBy,
+		  sequence_num as sequenceNum,is_del as isDel,pub_id as pubId, pub_type as pubType,
+		  is_report as isReport, report_type as reportType,news_author as newsAuthor,merge_id as mergeId
+	    from text_gov_info where news_id=#newsId#
+   </select>
+   <!--用于政务信息报表查询    查询上报数量-->
+   <select id="getGovReportNum"  parameterClass="Map"  resultClass="textGovReport">
+   		SELECT   aa.dept_category as deptCategory, aa.dept_name as deptName,aa.sequenceNum as sequenceNum , 
+                 aa.shangb as shangb
+            FROM (SELECT   c.dept_category, c.dept_name, COUNT (news_title) AS shangb,c.sequence_num as sequenceNum
+                      FROM ((SELECT s.dept_category, s.dept_name, m.news_title
+                               FROM sys_department s LEFT OUTER JOIN text_news m
+                                    ON s.DEPT_ID = m.ENTRY_DEPT
+                              WHERE s.is_del = '0'
+                                AND m.is_del = '0'
+                                AND m.news_tags LIKE '%Gov%'
+                                AND m.flag != '0'
+                                <dynamic>
+		                        	<isNotEmpty prepend="and" property="startDate">
+		                        	  m.create_date >=#startDate#
+		                        	</isNotEmpty>
+		                        	<isNotEmpty prepend="and" property="endDate">
+		                              m.create_date <![CDATA[ <=#endDate# ]]>
+		                        	</isNotEmpty>
+		                        </dynamic>) b
+                           RIGHT JOIN
+                           (SELECT dept_name, dept_category,sequence_num
+                              FROM sys_department s
+                             WHERE s.is_del = '0'
+                             <dynamic>
+                                <isNotEmpty prepend="and" property="status">
+                                     s.dept_category like '%'||decode(#status#,'',s.dept_category,#status#)||'%'
+                                 </isNotEmpty>
+                             </dynamic>
+                             ) c ON b.dept_name = c.dept_name)
+                  GROUP BY c.dept_name, c.dept_category,c.sequence_num) aa             
+        ORDER BY  aa.sequenceNum asc
+   </select>
+   
+   <select id="queryGovReportStat"  parameterClass="Map"  resultClass="textGovReport">
+   		
+		SELECT 
+		DEPT.DEPT_ID
+		,DEPT.DEPT_NAME deptName
+		,DEPT.DEPT_CATEGORY deptCategory
+		,CONT.contNum shangb
+		,edit.editNum caiy
+		,dayScor.dayNum daily
+		,subjectScor.subjectNum subject
+		,trffDeptScor.trffDeptNum traffic
+		,cityCommitteeScor.cityCommitteeNum cityCom 
+		,cityGovernmentScor.cityGovernmentNum cityGov
+		,comLeaderApprScor.comLeaderApprNum comLeader
+		
+		,govLeaderApprScor.govLeaderApprNum govLeader
+		,trafLeaderApprScor.trafLeaderApprNum trafLeader
+		
+		FROM SYS_DEPARTMENT dept 
+		LEFT JOIN 
+		(SELECT NEWS.ENTRY_DEPT,COUNT(1) contNum FROM text_news news WHERE NEWS.CREATE_DATE >= #startDate# AND news.CREATE_DATE <![CDATA[<=]]> #endDate# AND NEWS.IS_DEL = 0   and news.NEWS_TAGS like '%,GovNews,%' GROUP BY NEWS.ENTRY_DEPT)
+		CONT ON DEPT.DEPT_ID = CONT.ENTRY_DEPT 
+		LEFT JOIN
+		(SELECT NEWS.ENTRY_DEPT,COUNT(1) editNum FROM text_news news WHERE NEWS.CREATE_DATE >= #startDate# AND news.CREATE_DATE <![CDATA[<=]]> #endDate# AND NEWS.IS_DEL = 0  AND NEWS.GOV_USE_FLAG > 0 GROUP BY NEWS.ENTRY_DEPT)
+		edit ON DEPT.DEPT_ID = edit.ENTRY_DEPT 
+		LEFT JOIN 
+		(
+		SELECT NEWS.ENTRY_DEPT,COUNT(1) dayNum FROM text_news news
+		LEFT JOIN TEXT_DEPT_SCORE scor ON news.NEWS_ID = scor.NEWS_ID 
+		 WHERE  news.CREATE_DATE >= #startDate# AND news.CREATE_DATE <![CDATA[<=]]> #endDate# AND NEWS.IS_DEL = 0  AND scor.IS_DEL = 0 AND scor.SCORE_INFO='dailyInfo' GROUP BY NEWS.ENTRY_DEPT
+		) 
+		dayScor ON DEPT.DEPT_ID = dayScor.ENTRY_DEPT 
+		LEFT JOIN 
+		(
+		SELECT NEWS.ENTRY_DEPT,COUNT(1) subjectNum FROM text_news news
+		JOIN TEXT_DEPT_SCORE scor ON news.NEWS_ID = scor.NEWS_ID 
+		 WHERE news.CREATE_DATE >= #startDate# AND news.CREATE_DATE <![CDATA[<=]]> #endDate# AND NEWS.IS_DEL = 0  
+		AND scor.IS_DEL = 0 AND scor.SCORE_INFO='subjectInfo' 
+		GROUP BY NEWS.ENTRY_DEPT
+		)
+		subjectScor ON DEPT.DEPT_ID = subjectScor.ENTRY_DEPT 
+		LEFT JOIN 
+		(
+		SELECT NEWS.ENTRY_DEPT,COUNT(1) trffDeptNum FROM text_news news
+		JOIN TEXT_DEPT_SCORE scor ON news.NEWS_ID = scor.NEWS_ID 
+		 WHERE news.CREATE_DATE >= #startDate# AND news.CREATE_DATE <![CDATA[<=]]> #endDate# AND NEWS.IS_DEL = 0   
+		AND scor.IS_DEL = 0 AND scor.SCORE_INFO='trafficDept' 
+		GROUP BY NEWS.ENTRY_DEPT
+		)
+		trffDeptScor ON DEPT.DEPT_ID = trffDeptScor.ENTRY_DEPT 
+		LEFT JOIN 
+		(
+		SELECT NEWS.ENTRY_DEPT,COUNT(1) cityCommitteeNum FROM text_news news
+		JOIN TEXT_DEPT_SCORE scor ON news.NEWS_ID = scor.NEWS_ID 
+		 WHERE news.CREATE_DATE >= #startDate# AND news.CREATE_DATE <![CDATA[<=]]> #endDate# AND NEWS.IS_DEL = 0   
+		AND scor.IS_DEL = 0 AND scor.SCORE_INFO='cityCommittee' 
+		GROUP BY NEWS.ENTRY_DEPT
+		)
+		cityCommitteeScor ON DEPT.DEPT_ID = cityCommitteeScor.ENTRY_DEPT 
+		LEFT JOIN 
+		(
+		SELECT NEWS.ENTRY_DEPT,COUNT(1) cityGovernmentNum FROM text_news news
+		JOIN TEXT_DEPT_SCORE scor ON news.NEWS_ID = scor.NEWS_ID 
+		 WHERE news.CREATE_DATE >= #startDate# AND news.CREATE_DATE <![CDATA[<=]]> #endDate# AND NEWS.IS_DEL = 0   
+		AND scor.IS_DEL = 0 AND scor.SCORE_INFO='cityGovernment' 
+		GROUP BY NEWS.ENTRY_DEPT
+		)
+		cityGovernmentScor ON DEPT.DEPT_ID = cityGovernmentScor.ENTRY_DEPT 
+
+		LEFT JOIN 
+		(
+		SELECT NEWS.ENTRY_DEPT,COUNT(1) comLeaderApprNum FROM text_news news
+		JOIN TEXT_DEPT_SCORE scor ON news.NEWS_ID = scor.NEWS_ID 
+		 WHERE news.CREATE_DATE >= #startDate# AND news.CREATE_DATE <![CDATA[<=]]> #endDate# AND NEWS.IS_DEL = 0   
+		AND scor.IS_DEL = 0 AND scor.SCORE_INFO='comLeaderAppr' 
+		GROUP BY NEWS.ENTRY_DEPT
+		)
+		comLeaderApprScor ON DEPT.DEPT_ID = comLeaderApprScor.ENTRY_DEPT 
+		LEFT JOIN 
+		(
+		SELECT NEWS.ENTRY_DEPT,COUNT(1) govLeaderApprNum FROM text_news news
+		JOIN TEXT_DEPT_SCORE scor ON news.NEWS_ID = scor.NEWS_ID 
+		 WHERE news.CREATE_DATE >= #startDate# AND news.CREATE_DATE <![CDATA[<=]]> #endDate# AND NEWS.IS_DEL = 0   
+		AND scor.IS_DEL = 0 AND scor.SCORE_INFO='govLeaderAppr' 
+		GROUP BY NEWS.ENTRY_DEPT
+		)
+		govLeaderApprScor ON DEPT.DEPT_ID = govLeaderApprScor.ENTRY_DEPT 
+		LEFT JOIN 
+		(
+		SELECT NEWS.ENTRY_DEPT,COUNT(1) trafLeaderApprNum FROM text_news news
+		JOIN TEXT_DEPT_SCORE scor ON news.NEWS_ID = scor.NEWS_ID 
+		 WHERE news.CREATE_DATE >= #startDate# AND news.CREATE_DATE <![CDATA[<=]]> #endDate# AND NEWS.IS_DEL = 0   
+		AND scor.IS_DEL = 0 AND scor.SCORE_INFO='trafLeaderAppr' 
+		GROUP BY NEWS.ENTRY_DEPT
+		)
+		trafLeaderApprScor ON DEPT.DEPT_ID = trafLeaderApprScor.ENTRY_DEPT 
+		WHERE DEPT.IS_DEL = 0 and DEPT.DEPT_ID <![CDATA[<>]]> 441
+		<isNotEmpty prepend="and" property="status">
+		dept.dept_category = #status#
+		</isNotEmpty>
+		ORDER BY DEPT.SEQUENCE_NUM 
+   		
+   </select>
+   <select id="queryGovNewsReport"  parameterClass="Map"  resultClass="govNewsReport">
+   	select  b.DEPT_ID deptId,A.DEPT_NAME deptName,A.NEWS_TITLE newsTitle
+   	,A.GOV_USE_FLAG govUseFlag
+   	,decode(A.GOV_USE_FLAG,0,'未采编',1,'采编已成刊',2,'采编未成刊', 3,'采编未成刊')as status
+   	,C.ADOPT_TYPE adoptType,C.REPORT_TYPE reportType
+   	,b.DEPT_CATEGORY deptCategory
+	from text_news a 
+	join sys_department b on A.ENTRY_DEPT=B.DEPT_ID
+	left join TEXT_GOV_INFO c on A.NEWS_ID=C.NEWS_ID
+	where a.is_del=0
+	 and a.NEWS_TAGS like '%GovNews%'
+	 <isNotEmpty prepend="and" property="startDate">
+	 	a.ENTRY_DATE> #startDate#
+	 </isNotEmpty>
+	 <isNotEmpty prepend="and" property="endDate">
+	 	a.ENTRY_DATE <![CDATA[<=]]> #endDate#
+	 </isNotEmpty>
+	 <isEqual prepend="and" property="isUse" compareValue="1">
+		A.GOV_USE_FLAG > 0
+	</isEqual>
+	<isNotEmpty prepend="and" property="status">
+		b.DEPT_CATEGORY = #status#
+	</isNotEmpty>
+	order by b.SEQUENCE_NUM
+   </select>
+   
+   <resultMap id="submitMap" class="java.util.HashMap">  
+     <result property="deptId" column="deptId" javaType="java.lang.Integer" />  
+     <result property="submitNum" column="submitNum" javaType="java.lang.Integer" />  
+   </resultMap>  
+   
+   <select id="queryDeptShangbaoStat"  parameterClass="Map"  resultMap="submitMap">
+   	select  b.DEPT_ID deptId,count(1) submitNum
+	from text_news a 
+	join sys_department b on A.ENTRY_DEPT=B.DEPT_ID
+	where a.is_del=0
+	 and a.NEWS_TAGS like '%GovNews%'
+	 <isNotEmpty prepend="and" property="startDate">
+	 	a.ENTRY_DATE> #startDate#
+	 </isNotEmpty>
+	 <isNotEmpty prepend="and" property="endDate">
+	 	a.ENTRY_DATE <![CDATA[<=]]> #endDate#
+	 </isNotEmpty>
+	 <isEqual prepend="and" property="isUse" compareValue="1">
+		A.GOV_USE_FLAG > 0
+	</isEqual>
+	<isNotEmpty prepend="and" property="status">
+		b.DEPT_CATEGORY = #status#
+	</isNotEmpty>
+	group by b.DEPT_ID
+   </select>
+   
+   <update id="syncGovInfoContent" parameterClass="TextGovInfo" >
+   	UPDATE TEXT_GOV_INFO SET GI_CONTENT=#giContent# WHERE NEWS_ID=#newsId#
+   </update>
+   
+</sqlMap>

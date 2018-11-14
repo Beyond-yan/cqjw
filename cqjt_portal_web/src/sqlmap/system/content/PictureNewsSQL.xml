@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--图片内容管理     20140714 H2603282 -->
+<sqlMap namespace="Picture">
+	<!--获取所有图片信息 -->
+	<select id="getAllPicture" parameterClass="map" resultClass="picture">
+		select pic_id as picId,
+		       pic_title as picTitle,
+		       sub_title as subTitle,
+		       entry_user as entryUser,
+		       to_char(entry_date ,'yyyy-MM-dd ') as entryDate,
+		       pic_desc as picDesc,
+		       pic_url as picUrl,
+		       approvaler as approvaler ,
+		       source as source,
+		       flag as flag,
+		       is_del as isDel 
+			 from pic_news
+			 where is_del=#isDel#
+			 <dynamic>
+			   <isNotEmpty prepend="and" property="picTitle">
+			   	pic_title like '%'||decode(#picTitle#,'',pic_title,#picTitle#)||'%'	
+			   </isNotEmpty> 
+		       <isNotEmpty prepend="and" property="entryUser">
+			    entry_user like '%'||decode(#entryUser#,'',entry_user,#entryUser#)||'%'
+		       </isNotEmpty>
+			   <isNotEmpty prepend="and" property="entryDateS">
+		      	 entry_date >=#entryDateS#
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="entryDateE">
+			     entry_date  
+			     <![CDATA[  <=#entryDateE#]]>
+			   </isNotEmpty>
+			    <isNotEmpty prepend="and" property="flag">
+		        <iterate property="flag" open="(" close=")" conjunction="or">
+				  flag=#flag[]#
+		        </iterate>
+		        </isNotEmpty>
+			</dynamic>
+			order by entry_date desc
+	</select>	
+	<!--根据picId查询资料-->
+		<select id="getPicByPicId" parameterClass="String" resultClass="picture">
+			select     pic_id as picId,
+				       pic_title as picTitle,
+				       sub_title as subTitle,
+				       entry_user as entryUser,
+				       to_char(entry_date ,'yyyy-MM-dd ') as entryDate,
+				       pic_desc as picDesc,
+				       pic_url as picUrl,
+				       approvaler as approvaler ,
+				       source as source,
+				       flag as flag,
+				       is_del as isDel 
+			 from pic_news
+			where is_del='0' and pic_id=#picId#
+		</select> 
+		<!--插入图片内容信息-->
+        <insert id="insertPic" parameterClass="picture" >
+			insert into pic_news (
+				pic_id,pic_title,sub_title,
+				entry_user, entry_date,
+				pic_desc, pic_url,approvaler,
+				source,flag,is_del
+							) values (
+				#picId#,#picTitle#,#subTitle#, #entryUser#, to_date(#entryDate#,'yyyy-MM-dd hh24:mi:ss'), #picDesc#,#picUrl#,#approvaler#,#source#,#flag#,#isDel#)
+		</insert>
+    <!--更新图片资料-->
+      <update id="updatePic" parameterClass="picture">
+      	update pic_news
+			set 
+			<dynamic>
+			   <isNotEmpty  property="isDel">
+				 	is_del=#isDel#
+			   </isNotEmpty> 
+			   <isEmpty  property="isDel">
+				pic_title=#picTitle#,
+				sub_title=#subTitle#, 
+			    entry_user=#entryUser#,  
+				pic_desc=#picDesc#,
+				flag=#flag#,
+				approvaler=#approvaler#,
+                pic_url=#picUrl#,
+				source=#source#
+			   </isEmpty>
+			</dynamic>
+			where pic_id=#picId#
+      </update >		
+</sqlMap>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Menu">
+	
+	<select id="getMenuById" parameterClass="String" resultClass="Menu">
+		SELECT MENU_ID AS id,
+		PARENT_ID AS pId,
+		MENU_NAME AS name,
+		MENU_VALUE AS url,
+		MENU_URL AS iconSkin,
+		'mainFrame' AS target,
+		'true' AS open
+		FROM SYS_MENU
+		where MENU_ID = #menuId#
+	</select>
+	
+	<select id="getMenus" parameterClass="java.util.Map" resultClass="Menu">
+		SELECT a.MENU_ID AS id,
+		a.PARENT_ID AS pId,
+		a.MENU_NAME AS name,
+		a.MENU_VALUE AS url,
+		a.MENU_URL AS iconSkin,
+		'mainFrame' AS target,
+		'true' AS open
+		FROM
+		SYS_MENU a
+		JOIN
+		SYS_ROLE_MENU b
+		ON A.MENU_ID =
+		B.MENU_ID AND B.ROLE_ID = #roleID#
+		WHERE a.is_del = '0' AND a.PARENT_ID != '0'
+		START WITH A.MENU_ID =
+		#parentID#
+		CONNECT BY PRIOR a.MENU_ID = a.parent_id
+		ORDER BY
+		a.menu_id
+	</select>
+
+	<select id="getTopMenus" parameterClass="java.util.Map"
+		resultClass="Menu">
+		SELECT a.MENU_ID AS id, a.MENU_NAME AS name, a.MENU_VALUE AS url, a.MENU_URL AS iconSkin
+		FROM SYS_MENU a
+		JOIN
+		SYS_ROLE_MENU b
+		ON A.MENU_ID = B.MENU_ID
+		AND B.ROLE_ID = #roleID#
+		AND A.PARENT_ID = #parentID#
+		ORDER BY a.menu_id
+	</select>
+</sqlMap>

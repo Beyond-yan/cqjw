@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--资料下载     20140612 gyf-->
+<sqlMap namespace="SpecialInformationDao">
+<!-- 
+	<sql id="sql_column">
+		giId,newsId,giTitle,giContent,adoptType,entryUser,entryDate,entryDept,createBy,sequenceNum,pubType,pubId,isDel,
+		createDate,isReport,reportType,newsAuthor,mergeId,isSelected
+	</sql>
+
+	<sql id="sql_where">
+		is_del=0
+		<dynamic>
+			<isNotEmpty prepend="and" property="adoptType">
+				adopt_Type like '%'||#adoptType#||'%'	
+			</isNotEmpty> 
+			<isNotEmpty prepend="and" property="beginDate">
+		      	create_Date >=#beginDate#
+		    </isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+			   <![CDATA[  create_Date <=#endDate#]]>
+			</isNotEmpty>
+		</dynamic>
+		order by create_Date desc
+	</sql>
+	
+	<select id="queryPageList" parameterClass="Map" resultClass ="TextGovInfo">
+		select * FROM (
+		   select gi_id as giId, news_id as newsId, gi_title as giTitle,gi_content as giContent, 
+		      adopt_type as adoptType, entry_user as entryUser,
+		      entry_date as entryDate, entry_dept as entryDept, 
+			  to_char(create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, create_by as createBy,
+			  sequence_num as sequenceNum,is_del as isDel,pub_id as pubId, pub_type as pubType,
+			  is_report as isReport, report_type as reportType ,news_author as newsAuthor
+		    from text_gov_info where is_del=0
+		   <dynamic>
+			   <isNotEmpty prepend="and" property="adoptType">
+					adopt_Type like '%'||#adoptType#||'%'	
+				</isNotEmpty>
+		   </dynamic> 
+		   order by createDate desc nulls last) where 1=1
+		   <dynamic>
+			<isNotEmpty prepend="and" property="startRow">
+		      ROWNUM > #startRow#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endRow">
+			<![CDATA[ ROWNUM<=#endRow# ]]>
+			</isNotEmpty>
+			</dynamic> 
+	</select>
+	
+	<select id="queryCount" parameterClass="Map" resultClass ="Integer">
+		select count(1) from text_gov_info where 
+		<include refid="sql_where"/>
+	</select>
+	
+	<select id="query" parameterClass="String" resultClass ="TextGovInfo">
+		select gi_id as giId, news_id as newsId, gi_title as giTitle,gi_content as giContent, 
+		      adopt_type as adoptType, entry_user as entryUser,
+		      entry_date as entryDate, entry_dept as entryDept, 
+			  to_char(create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, create_by as createBy,
+			  sequence_num as sequenceNum,is_del as isDel,pub_id as pubId, pub_type as pubType,
+			  is_report as isReport, report_type as reportType ,news_author as newsAuthor
+		    from text_gov_info where  gi_id = #giId#
+	</select>
+	 -->
+	
+	<sql id="sql_column">
+		specialId,specialTitle,specialContent,specialDel,specialTop,specialCreateDate,specialEditDate,specialCreateUserName,specialPublish,specialAccessoryUrl,specialAccessoryName
+	</sql>
+
+	<sql id="sql_where">
+		special.specialDel = 0
+		<dynamic>
+			<isNotEmpty prepend="and" property="specialTitle">
+				special.specialTitle like '%'||#specialTitle#||'%'	
+			</isNotEmpty> 
+			<isNotEmpty prepend="and" property="beginDate">
+		      	special.specialCreateDate >=#beginDate#
+		    </isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+			   <![CDATA[  special.specialCreateDate <=#endDate#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="specialPublish">
+			   special.specialPublish = #specialPublish#
+			</isNotEmpty>
+		</dynamic>
+		order by special.specialTop desc nulls last,special.specialCreateDate desc
+	</sql>
+	
+	<insert id="insert" parameterClass="SpecialInformationVo">
+		insert into special_Information(specialId,specialTitle,specialContent,specialTop,specialCreateDate,specialCreateUserName,specialPublish,specialAccessoryUrl,specialAccessoryName) 
+		values(#specialId#,#specialTitle#,#specialContent#,#specialTop#,#specialCreateDate#,#specialCreateUserName#,#specialPublish#,#specialAccessoryUrl#,#specialAccessoryName#)
+		
+	</insert>
+	<update id="edit"  parameterClass="SpecialInformationVo">
+		update special_Information set 
+			specialTitle=#specialTitle#,specialContent=#specialContent#,specialTop=#specialTop#,specialEditDate=#specialEditDate#,specialPublish=#specialPublish# 
+			,specialAccessoryUrl=#specialAccessoryUrl#,specialAccessoryName=#specialAccessoryName#
+		where specialId = #specialId#
+	</update>
+	<update id="del"  parameterClass="String">
+		update special_Information set specialDel = 1
+		where specialId = #specialId#
+	</update>
+	<delete id="remove"  parameterClass="String">
+		delete from special_Information where specialId = #specialId#
+	</delete>
+	
+	<select id="query" parameterClass="String" resultClass ="SpecialInformationVo">
+		select <include refid="sql_column"/> from special_Information special where specialId = #specialId#
+	</select>
+	<select id="queryCount" parameterClass="Map" resultClass ="Integer">
+		select count(1) from special_Information special where 
+		<include refid="sql_where"/>
+			
+	</select>
+	<select id="queryList" parameterClass="Map" resultClass ="SpecialInformationVo">
+		select * from special_Information special where 
+		<include refid="sql_where"/>
+	</select>
+	<select id="queryPageList" parameterClass="Map" resultClass ="SpecialInformationVo">
+		<!-- SELECT * FROM (
+            SELECT special.*,ROWNUM n FROM special_Information special WHERE
+			<include refid="sql_where"/>
+		) t
+		where n>#beginLimit# and <![CDATA[ n<=#endLimit# ]]> -->
+		select * FROM (
+			SELECT ROWNUM rn,special.* FROM (
+			SELECT special.*,ROWNUM n FROM special_Information special WHERE
+			<include refid="sql_where"/>
+		) special) WHERE rn > #beginLimit# and <![CDATA[ rn<=#endLimit# ]]>
+	</select>
+</sqlMap>

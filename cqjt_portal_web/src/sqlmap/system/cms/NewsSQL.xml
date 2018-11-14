@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="CMSNews">
+	
+	<insert id="insertTextNews" parameterClass="Map">
+		<selectKey resultClass="String" keyProperty="id" >
+			SELECT SYS_GUID() AS ID FROM DUAL
+		</selectKey>
+	   	INSERT INTO TRAFFIC_TEXT_NEWS_INFO_T (
+		   NEWS_ID, NEWS_TITLE, NEWS_CONTENT, 
+		   NEWS_STATUS, ENTRY_USER, ENTRY_DATE, 
+		   SECTION_POSTION, APPROVALER, RECORD_DATE, WRITER, 
+		   PROGRAM_TYPE, PRESS_DATE, NEWS_PART_TAG, NEWS_SOURCE_DES, 
+		   IS_PHOTOS_SHOW,NEWS_SOURCE,data_source,is_from_nw
+		) values (
+		  #id#, #textNews.newsTitle#, #textNews.newsContent#,
+		  7, #textNews.entryUser#, #textNews.entryDate#, 
+		  4, #textNews.approvaler#, sysdate, #textNews.newsAuthor#, 
+		  #programId#, sysdate, '1', #textNews.deptName#, 
+		  #textNews.isPhotosShow#,30,0,1
+		) 
+   </insert>
+   
+   <insert id="insertProgramRef" parameterClass="Map">
+	   	INSERT INTO TRAFFIC_PAGE_NEWS_REF_T (
+		   PAGE_ID, NEWS_ID, IS_FIRST, 
+		   CREATE_USER, CREATE_DATE
+		) values (
+		  #programId#, #newsId#, #isFirst#,
+		  #createUser#, sysdate
+		) 
+   </insert>
+   <!--更新新闻-->
+   <update id="updateTextNews" parameterClass="Map">
+   	    update TRAFFIC_TEXT_NEWS_INFO_T set 
+   	    <dynamic>
+		   <isNotEmpty  property="isDel">
+			 	is_del=#isDel#
+		   </isNotEmpty> 
+		   <isEmpty  property="isDel">
+			   	NEWS_TITLE=#textNews.newsTitle#,
+				NEWS_CONTENT=#textNews.newsContent#,
+				ENTRY_USER=#textNews.entryUser#, 
+				ENTRY_DATE=#textNews.entryDate#,
+				APPROVALER=#textNews.approvaler#,
+				WRITER=#textNews.newsAuthor#,
+				PROGRAM_TYPE=#programId#,
+				NEWS_SOURCE_DES = #textNews.deptName#,	
+				IS_PHOTOS_SHOW = #textNews.isPhotosShow#,
+				is_del='0'
+		   </isEmpty>
+		</dynamic>
+		where NEWS_ID=#textNews.outerNewsId#
+   </update>
+	<!--更新栏目与新闻对应关系-->
+   <update id="updateProgramRef" parameterClass="Map">
+   	    update TRAFFIC_PAGE_NEWS_REF_T set 
+			   is_del=#isDel#
+		where NEWS_ID=#textNews.outerNewsId#
+   </update>
+</sqlMap>

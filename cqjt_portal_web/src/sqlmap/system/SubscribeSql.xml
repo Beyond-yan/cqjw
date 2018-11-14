@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--资料下载     20140612 gyf-->
+<sqlMap namespace="SubscribeDao">
+	<sql id="sql_column">
+		subsId,subsTitle,subsContent,subsTop,subsDel,subsCreateDate,subsEditDate,subsSendUserId,
+		subsRecvDeptId,subsRecvUserId,subsRecvDeptName,subsPublish
+	</sql>
+
+	<sql id="sql_where">
+		subs.subsDel = 0
+		<dynamic>
+			<isNotEmpty prepend="and" property="subsTitle">
+				subs.subsTitle like '%'||#subsTitle#||'%'	
+			</isNotEmpty> 
+			<isNotEmpty prepend="and" property="beginDate">
+		      	subs.subsCreateDate >=#beginDate#
+		    </isNotEmpty>
+		    <isNotEmpty prepend="and" property="subsRecvDeptName">
+		      	subs.subsRecvDeptName like '%'||#subsRecvDeptName#||'%'
+		    </isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+			   <![CDATA[  subs.subsCreateDate <=#endDate#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="subsPublish">
+		      	subs.subsPublish = #subsPublish#
+		    </isNotEmpty>
+		</dynamic>
+		order by subs.subsTop desc nulls last,subs.subsCreateDate desc
+	</sql>
+	
+	<insert id="insert" parameterClass="SubscribeVo">
+		insert into portl_subscribe_notice(subsId,subsTitle,subsContent,subsTop,subsCreateDate,subsRecvDeptId,subssendUserId,subsRecvDeptName,subsPublish) 
+		values(#subsId#,#subsTitle#,#subsContent#,#subsTop#,#subsCreateDate#,#subsRecvDeptId#,#subssendUserId#,#subsRecvDeptName#,#subsPublish#)
+		
+	</insert>
+	<update id="edit"  parameterClass="SubscribeVo">
+		update portl_subscribe_notice set 
+			subsTitle=#subsTitle#,
+			subsContent=#subsContent#,
+			subsTop=#subsTop#,subsEditDate=#subsEditDate#,
+			subsRecvDeptName=#subsRecvDeptName#,
+			subsPublish=#subsPublish#
+		where subsId = #subsId#
+	</update>
+	<update id="del"  parameterClass="String">
+		update portl_subscribe_notice set subsDel = 1
+		where subsId = #subsId#
+	</update>
+	<delete id="remove"  parameterClass="String">
+		delete from portl_subscribe_notice where subsId = #subsId#
+	</delete>
+	
+	<select id="query" parameterClass="String" resultClass ="SubscribeVo">
+		select <include refid="sql_column"/> from portl_subscribe_notice subs where subsId = #subsId#
+	</select>
+	<select id="queryCount" parameterClass="Map" resultClass ="Integer">
+		select count(1) from portl_subscribe_notice subs where 
+		<include refid="sql_where"/>
+			
+	</select>
+	<select id="queryList" parameterClass="Map" resultClass ="SubscribeVo">
+		select * from portl_subscribe_notice subs where 
+		<include refid="sql_where"/>
+	</select>
+	<select id="queryPageList" parameterClass="Map" resultClass ="SubscribeVo">
+		<!-- SELECT * FROM (
+            SELECT subs.*,ROWNUM n FROM portl_subscribe_notice subs WHERE
+			<include refid="sql_where"/>
+		) t
+		where n>#beginLimit# and <![CDATA[ n<=#endLimit# ]]>  -->
+		select * FROM (
+			SELECT ROWNUM rn,sub.* FROM (
+			SELECT subs.*,ROWNUM n FROM portl_subscribe_notice subs WHERE
+			<include refid="sql_where"/>
+		) sub) WHERE rn > #beginLimit# and <![CDATA[ rn<=#endLimit# ]]>
+	</select>
+	<!-- 置顶 -->
+	<update id="top" parameterClass="SubscribeVo">
+		UPDATE portl_subscribe_notice SET subsTop = #subsTop# WHERE subsID = #subsId#
+	</update>
+</sqlMap>

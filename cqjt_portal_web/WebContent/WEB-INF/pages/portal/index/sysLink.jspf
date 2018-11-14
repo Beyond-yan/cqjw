@@ -1,0 +1,30 @@
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<ul class="sysEnter clearfix">
+    <c:if test="${not empty mailSession}">
+    	<li><a target="_blank" class="btn-01" href="${mailServerUrl}?${mailSession}" title="重庆交通办公邮件系统"></a></li>
+    </c:if>
+    <li><a target="_blank" class="btn-02" href="http://10.224.5.162:7001/ECSWeb" title="重庆交通运行管理平台"></a></li>
+    <li><a target="_blank" class="btn-04" href="http://10.224.5.167/cqxq/" title="电子监察系统"></a></li>
+    <li><a target="_blank" class="btn-05" href="http://10.224.5.167/cqxq/" title="综合执法系统"></a></li>
+    <!--<li><a target="_blank" class="btn-07" href="http://10.224.5.44:8080/evias" title="图文数据库管理系统"></a></li>-->
+    <!--<li><a target="_blank" class="btn-07" href="http://10.224.5.7:8081/pdvms/index/index.jsp" title="图文数据库管理系统"></a></li>-->
+    
+    <li><a target="_blank" class="btn-09" href="http://23.2.0.11" title="重庆市政府办公门户网"></a></li>
+    <!-- <li><a target="_blank" class="btn-10" href="http://23.2.0.111:8083/index.do" title="重庆市网上行政审批平台"></a></li> -->
+    <c:choose>
+		<c:when	test="${empty username_ws}">
+	    <li><a target="_blank" class="btn-10" href="http://23.99.127.111:8083/index.do" title="重庆市网上行政审批平台"></a></li> 
+		</c:when>
+		<c:otherwise>
+	    <li><a target="_blank" class="btn-10" href="${lcxzspSsoUrl}?username=${username_ws}&sybmol=${sybmol}&target=${target}&token=${token}" title="重庆市网上行政审批平台"></a></li> 
+		</c:otherwise>
+	</c:choose>
+    
+    <li><a target="_blank" class="btn-11" href="http://10.250.0.25/zwxx" title="交通部政务信息网络交互平台"></a></li>
+    <li><a target="_blank" class="btn-12" href="http://10.224.140.72:8008/cqblsp/login.jsp" title="市并联审批"></a></li>
+    <!--<li><a target="_blank" class="btn-12" href="http://10.225.5.171:7001/yyaq/jtlogin.jsp" title="重庆交通应急平台数据工程"></a></li>
+	<li><a target="_blank" class="btn-03" href="http://10.224.2.176:7001/WebRoot/" title="96096热线服务台平台"></a></li>
+    <li><a target="_blank" class="btn-06" href="http://10.224.5.150:7001/cqjtzhywxt/" title="重庆交通综合业务系统"></a></li>
+    <li><a target="_blank" class="btn-08" href="http://10.224.5.153:8081/ovi/" title="公务车管理系统"></a></li> -->
+</ul>

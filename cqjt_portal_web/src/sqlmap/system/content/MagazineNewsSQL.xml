@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--杂志刊物管理     20140707 -->
+<sqlMap namespace="Magazine">
+		<!--获取所有杂志刊物 -->
+		<select id="getAllMagazine" parameterClass="map" resultClass="magazine">
+			select magazine_id as magazineId,
+					title as title, 
+					magazine_no as magazineNo,
+					entry_user as entryUser, 
+					to_char(entry_date ,'yyyy-MM-dd ') as entryDate,
+					photo_url as photoUrl,
+					magazine_url as magazineUrl,
+					approvaler as approvaler,
+			        is_del as isDel, 
+                    flag as flag
+			from magazine_News
+			where is_del=#isDel#
+			<dynamic>
+			   <isNotEmpty prepend="and" property="title">
+			   	title like '%'||decode(#title#,'',title,#title#)||'%'	
+			   </isNotEmpty> 
+		  <isNotEmpty prepend="and" property="entryUser">
+			 entry_user like '%'||decode(#entryUser#,'',entry_user,#entryUser#)||'%'
+		   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="entryDateS">
+		      	 entry_date >=#entryDateS#
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="entryDateE">
+			     entry_date  
+			     <![CDATA[  <=#entryDateE#]]>
+			   </isNotEmpty>
+			    <isNotEmpty prepend="and" property="flag">
+		        <iterate property="flag" open="(" close=")" conjunction="or">
+				  flag=#flag[]#
+		        </iterate> 
+		     </isNotEmpty>
+			</dynamic>
+			order by entry_date desc
+		</select>
+		<!--根据magazineId查询资料-->
+		<select id="getMagazineByMagazineId" parameterClass="String" resultClass="magazine">
+			select magazine_id as magazineId,
+					title as title, 
+					magazine_no as magazineNo,
+					entry_user as entryUser, 
+					to_char(entry_date ,'yyyy-MM-dd') as entryDate,
+					photo_url as photoUrl,
+					magazine_url as magazineUrl,
+					approvaler as approvaler,
+					flag as flag
+			from magazine_News
+			where is_del='0' and magazine_id=#magazineId#
+		</select> 
+		 <!--更新  -->
+		<update id="updateMagazine" parameterClass="magazine">
+			update magazine_news 
+			set 
+			<dynamic>
+			   <isNotEmpty  property="isDel">
+				 	is_del=#isDel#
+			   </isNotEmpty> 
+			   <isEmpty  property="isDel">
+				title= #Title#,
+			    entry_user=#entryUser#, 
+				flag=#flag#,
+				magazine_no=#magazineNo#,
+                magazine_url=#magazineUrl#,
+                photo_url=#photoUrl#
+			   </isEmpty>
+			</dynamic>
+			where magazine_id=#magazineId#
+		</update>	
+      <!--刊物杂志 存草稿-->
+        <insert id="insertMagazine" parameterClass="magazine" >
+			insert into magazine_news (
+				magazine_id,title, 
+				magazine_no,entry_user, 
+				entry_date,photo_url,
+				magazine_url,approvaler,
+				flag,is_del
+							) values (
+				#magazineId#,#title#,#magazineNo#, #entryUser#, to_date(#entryDate#,'yyyy-MM-dd hh24:mi:ss'), #photoUrl#,#magazineUrl#,#approvaler#,#flag#,#isDel#)
+		</insert>
+</sqlMap>
+

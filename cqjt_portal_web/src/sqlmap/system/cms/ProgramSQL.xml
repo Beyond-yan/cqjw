@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Program">
+	
+	<select id="getAll" parameterClass="java.lang.String" resultClass="program">
+		SELECT RESOURCE_ID AS id, PARENT_ID AS parentId, RESOURCE_NAME AS name, RESOURCE_TYPE AS type 
+		FROM TRAFFIC_RESOURCE 
+		WHERE IS_CATEGORY=1
+			AND	 RESOURCE_TYPE =#type#
+		ORDER BY RESOURCE_ID
+	</select>
+	
+</sqlMap>

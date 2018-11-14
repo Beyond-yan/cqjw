@@ -1,0 +1,3 @@
+-- 2018-07-06 新增权限：公路水路违法违规
+insert into SYS_MENU (MENU_ID, MENU_NAME, MENU_TYPE, MENU_VALUE, MENU_PRIORITY, CREATE_DATE, CREATE_USERNO, UPDATE_DATE, UPDATE_ID, MENU_DESC, IS_DEL, PARENT_ID, IS_CATEGORY, MENU_ORDER, MENU_URL, PAGE_TARGET)
+values ('010307', '公路水路违法违规', '0', 'waterTransport.xhtml?action=waterTransportIllegalManager', null, null, 'admin', null, 'admin', null, '0', '0103', '1', null, 'govInfo-manage', null);

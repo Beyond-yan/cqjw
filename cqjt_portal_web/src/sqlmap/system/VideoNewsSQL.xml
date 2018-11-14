@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+ PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+ "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="VideoNews">
+  
+   <!--查询 -->	
+   <select id="getVideoNewsList"  parameterClass="Map"  resultClass="videoNews">
+	   select video_id as videoId, video_title as videoTitle, sub_video_title as subVideoTitle,type,
+		  entry_user as entryUser,entry_dept_name as entryDeptName,entry_dept_id as entryDeptId,
+		  video_desc as videoDesc, flag ,category,video_url as videoUrl,photo_url as photoUrl,
+		 to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate, to_char(verify_date ,'yyyy-MM-dd hh24:mi:ss') as verifyDate,
+		 approvaler,video_source as videoSource,is_public as isPublic,
+		  is_del as isDel
+	    from video_news where is_del=#isDel#
+ 		<dynamic>
+		   <isNotEmpty prepend="and" property="videoTitle">
+			 video_title like '%'||decode(#videoTitle#,'',video_title,#videoTitle#)||'%'	
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="entryUser">
+			 entry_user like '%'||decode(#entryUser#,'',entry_user,#entryUser#)||'%'
+		   </isNotEmpty>
+		    <isNotEmpty prepend="and" property="entryDateS">
+		      create_date >=#entryDateS#
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="entryDateE">
+		      create_date  
+		      <![CDATA[  <=#entryDateE#]]>
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="flag">
+		     <iterate property="flag" open="(" close=")" conjunction="or">
+				  flag=#flag[]#
+		      </iterate> 
+		   </isNotEmpty>
+	   </dynamic>
+	   order by create_date desc nulls last
+   </select>
+   
+   <insert id="insertVideoNews" parameterClass="videoNews">
+   	insert into video_news(
+   	  video_id, video_title, sub_video_title, 
+	  entry_user, entry_dept_name, entry_dept_id, 
+	  video_desc, flag, category, 
+	  video_url, photo_url, create_date, verify_date,
+	  approvaler, video_source, is_public,type,file_name,image_name,
+	  is_del
+	) values (
+	  #videoId#,#videoTitle#,#subVideoTitle#,
+	  #entryUser#,#entryDeptName#,#entryDeptId#,
+	  #videoDesc#,#flag#,#category#,
+	  #videoUrl#,#photoUrl#,to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'),to_date(#verifyDate#,'yyyy-MM-dd hh24:mi:ss'),
+	  #approvaler#,#videoSource#, 
+	  #isPublic#,#type#,#fileName#,#imageName#,#isDel#
+	) 
+   </insert> 	 
+   <!--更新  -->
+		<update id="updateVideo" parameterClass="videoNews">
+			update video_news 
+			set 
+			<dynamic>
+			   <isNotEmpty  property="isDel">
+				 	is_del=#isDel#,
+				 	flag=#flag#
+			   </isNotEmpty> 
+			   <isEmpty  property="isDel">
+				video_title=#videoTitle# ,
+				sub_video_title=#subVideoTitle#, 
+			    entry_user=#entryUser#, 
+				entry_dept_name=#entryDeptName#, 
+			    entry_dept_id=#entryDeptId#, 
+				video_desc=#videoDesc#,
+				flag=#flag#,
+				category=#category#,
+                video_url=#videoUrl#,
+                photo_url=#photoUrl#,
+				video_source=#videoSource#,
+				is_public=#isPublic#,
+				type=#type#,
+				file_name=#fileName#,
+				image_Name=#imageName#,
+				verify_date=to_date(#verifyDate#,'yyyy-MM-dd hh24:mi:ss')
+			   </isEmpty>
+			</dynamic>
+			where video_id=#videoId#
+		</update>
+		<!--根据videoId查询资料-->	
+   <select id="getVideoByVideoId"  parameterClass="String"  resultClass="videoNews">
+	   select video_id as videoId, video_title as videoTitle, sub_video_title as subVideoTitle,type,
+		  entry_user as entryUser,entry_dept_name as entryDeptName,entry_dept_id as entryDeptId,
+		  video_desc as videoDesc, flag ,category,video_url as videoUrl,photo_url as photoUrl,
+		 to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate,
+		  to_char(verify_date ,'yyyy-MM-dd hh24:mi:ss') as verifyDate,
+		 approvaler,video_source as videoSource,is_public as isPublic,file_Name as fileName,image_Name as imageName,
+		  is_del as isDel
+	    from  video_news where is_del='0'and video_id=#videoId#
+	   order by create_date desc nulls last
+   </select>
+
+</sqlMap>

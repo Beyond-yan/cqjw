@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="InfoWorkNoticeDao">
+	
+	<!--首次加载并分页展示-->
+	<select id="queryInfoNoticeList" parameterClass="Map" resultClass="infoWorkNotice">
+			select workId ,workTitle,workCreateUserName,workTop,workCreateDate,workEditDate,workPublish,workPublishDate 
+			from PROTL_WORK_NOTICE notice where workDel = 0
+		<dynamic>
+			<isNotEmpty prepend="and" property="workTitle">
+				notice.workTitle like '%'||#workTitle#||'%'	
+			</isNotEmpty> 
+			<isNotEmpty prepend="and" property="beginDate">
+		       <![CDATA[	notice.workCreateDate >=#beginDate# ]]>
+		    </isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+			   <![CDATA[  notice.workCreateDate <=#endDate#]]>
+			</isNotEmpty>
+	   </dynamic> 
+	     	order by notice.workTop desc nulls last,notice.workCreateDate desc
+	</select>
+		
+	<!-- 逻辑删除 -->
+	<update id="del" parameterClass="String" > 
+		UPDATE protl_work_notice SET WORKDEL = '1' WHERE WORKID = #workId#
+	</update>
+	
+	<!-- 根据ID搜索 -->
+	<select id="query" parameterClass="String" resultClass ="infoWorkNotice">
+		select * from PROTL_WORK_NOTICE where WORKID = #workId#
+	</select> 
+	
+	<!-- 新增通知 -->
+	<insert id="insert" parameterClass="infoWorkNotice">
+		insert into PROTL_WORK_NOTICE(workId,workTitle,workContent,workTop,workCreateDate,workCreateUserName,workPublish,workPublishDate) 
+			values(#workId#,#workTitle#,#workContent#,#workTop#,#workCreateDate#,#workCreateUserName#,#workPublish#,#workPublishDate#)
+	</insert>
+	
+	<!-- 更新通知 -->
+	<update id="edit" parameterClass="infoWorkNotice">
+		UPDATE protl_work_notice SET workTitle = #workTitle#, workContent=#workContent#,
+			workTop=#workTop#,workEditDate=#workEditDate#,workPublish=#workPublish#,workPublishDate=#workPublishDate#
+			WHERE WORKID = #workId#
+	</update>
+	
+	<!-- 查询已发布的通知 -->
+	<select id="queryPublishInfoNotice"  parameterClass="Map" resultClass="infoWorkNotice">
+		select workId ,workTitle,workCreateUserName,workPublishDate 
+			from PROTL_WORK_NOTICE notice where workPublish = 1 and workDel = 0
+		<dynamic>
+			<isNotEmpty prepend="and" property="workTitle">
+				notice.workTitle like '%'||#workTitle#||'%'	
+			</isNotEmpty> 
+			<isNotEmpty prepend="and" property="beginDate">
+		       <![CDATA[	notice.workCreateDate >=#beginDate# ]]>
+		    </isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+			   <![CDATA[  notice.workCreateDate <=#endDate#]]>
+			</isNotEmpty>
+	   </dynamic> 
+	     	 <!-- order by notice.workCreateDate desc -->
+	     	order by notice.workTop desc nulls last,notice.workPublishDate desc
+	</select>
+	
+	<!-- 置顶功能 -->
+	<update id="top" parameterClass="infoWorkNotice">
+		UPDATE protl_work_notice SET workTop = #workTop# WHERE WORKID = #workId#
+	</update>
+	
+</sqlMap>

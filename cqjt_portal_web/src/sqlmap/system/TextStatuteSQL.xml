@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+	 PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+	 "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="TextStatute">
+	<!--法律法规查询 -->	
+	<select id="getTextStatuteList"  parameterClass="Map"  resultClass="textStatute">
+   	   select a.* from (
+	   select n.statute_id as statuteId, n.statute_title as statuteTitle, n.sub_statute_title as substatuteTitle, 
+		  n.statute_content as statuteContent, n.statute_tags as statuteTagsStr, n.category as category, 
+		  n.entry_user as entryUser,to_char(n.entry_date,'yyyy-MM-dd hh24:mi:ss')as entryDate, n.approvaler, 
+		  n.is_photos_show as isPhotosShow, n.photo_url as photoUrl, n.is_del as isDel, 
+		  n.flag, to_char(n.create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, n.create_by as createBy, 
+		  n.gov_use_flag as govUseFlag, n.statute_author as statuteAuthor, n.entry_dept as entryDept,n.dept_name as deptName, 
+		  n.statute_source as statuteSource, n.is_public as isPublic,  
+		  n.merge_id as mergeId,n.outer_statute_id as outerstatuteId,n.stick_state statuteSort,n.SUB_CATEGORY SUB_CATEGORY,n.SUB_CATEGORY_INFO SUB_CATEGORY_INFO,
+		  n.PUB_PERSON as pubPerson, to_char(n.PUB_DATE,'yyyy-MM-dd hh24:mi:ss') as pubDate,n.PUB_TEXT_NUM as pubTextNum,n.PUB_DAPT as pubDapt,to_char(n.INPLEMENT_DATE,'yyyy-MM-dd hh24:mi:ss') as inplementDate,n.TIMELINESS as timeliness,n.CAPTION as caption 
+	    from text_statute n
+	    where n.is_del=#isDel#
+		<dynamic>
+			<isNotEmpty prepend="and" property="category">
+		      n.category = #category#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="SUB_CATEGORY">
+		      n.SUB_CATEGORY = #SUB_CATEGORY#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="SUB_CATEGORY_INFO">
+		      n.SUB_CATEGORY_INFO = #SUB_CATEGORY_INFO#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isPhotosShow">
+		      n.is_photos_show = #isPhotosShow#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="statuteTitle">
+			 n.statute_title like '%'||decode(#statuteTitle#,'',n.statute_title,#statuteTitle#)||'%'	
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryUser">
+			 n.entry_user like '%'||decode(#entryUser#,'',n.entry_user,#entryUser#)||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateS">
+		      n.PUB_DATE >=#entryDateS#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateE">
+			n.PUB_DATE<![CDATA[ <=#entryDateE# ]]>
+			</isNotEmpty>
+		</dynamic> 
+		<dynamic>
+			order by n.stick_state desc, STICKSORT desc nulls last,n.entry_date desc	
+		</dynamic>
+	   ) a where 1=1 
+		<dynamic>
+			<isNotEmpty prepend="and" property="startRow">
+		      rownum >= #startRow#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endRow">
+			<![CDATA[ rownum <= #endRow# ]]>
+			</isNotEmpty>
+		</dynamic> 
+	</select> 
+	
+	<insert id="insertTextStatute" parameterClass="textStatute">
+ 	insert into text_statute(
+   	  statute_id, statute_title, sub_statute_title, 
+	  statute_content, statute_tags, category, 
+	  entry_user, entry_date, approvaler, 
+	  is_photos_show, photo_url, is_del, 
+	  flag, create_date, create_by, 
+	  gov_use_flag, statute_author, entry_dept, 
+	  statute_source, is_public,dept_name,outer_statute_id,outer_category,SUB_CATEGORY,SUB_CATEGORY_INFO,
+	  PUB_PERSON,PUB_DATE,PUB_TEXT_NUM,PUB_DAPT,INPLEMENT_DATE,TIMELINESS,CAPTION
+	) values (
+	  #statuteId#,#statuteTitle#,#substatuteTitle#,
+	  #statuteContent#,','||#statuteTagsStr#||',',#category#,
+	  #entryUser#,#entryDate#,#approvaler#,
+	  #isPhotosShow#,#photoUrl#,#isDel#,
+	  #flag#,to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'),#createBy#, 
+	  #govUseFlag#, #statuteAuthor#, #entryDept#, 
+	  #statuteSource#, #isPublic#, #deptName#,#outerstatuteId#,#outerCategory#,#SUB_CATEGORY#,#SUB_CATEGORY_INFO#,
+	  #pubPerson#,to_date(#pubDate#,'yyyy-MM-dd hh24:mi:ss'),#pubTextNum#,#pubDapt#,to_date(#inplementDate#,'yyyy-MM-dd hh24:mi:ss'),#timeliness#,#caption#
+	) 
+	</insert>
+	
+	<update id="updateTextStatute" parameterClass="textStatute">
+     update text_statute
+		<dynamic prepend="set">
+			<isNotNull prepend="," property="statuteTitle">
+     		 	 statute_title=#statuteTitle#
+			</isNotNull>
+			<isNotNull prepend="," property="statuteContent">
+     		 	   statute_content=#statuteContent#
+			</isNotNull>
+			<isNotNull prepend="," property="approvaler">
+				  approvaler=#approvaler#
+			</isNotNull>
+			<isNotNull prepend="," property="isDel">
+				 is_del=#isDel#
+			</isNotNull>
+			<isNotNull prepend="," property="govUseFlag">
+				    gov_use_flag=#govUseFlag#
+			</isNotNull>
+			<isNotNull prepend="," property="statuteAuthor">
+				    statute_author=#statuteAuthor#
+			</isNotNull>
+			<isNotNull prepend="," property="statuteSource">
+				     statute_source=#statuteSource#
+			</isNotNull>
+			<isNotNull prepend="," property="isPublic">
+				     is_public=#isPublic#
+			</isNotNull>
+			<isNotNull prepend="," property="entryDept">
+				     entry_dept=#entryDept#
+			</isNotNull>
+			<isNotNull prepend="," property="mergeId">
+				      merge_id=#mergeId#
+			</isNotNull>
+			<isNotNull prepend="," property="entryDate">
+				       entry_date=#entryDate#
+			</isNotNull>
+			<isNotNull prepend="," property="createDate">
+				      create_date=to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss')
+			</isNotNull>
+			<isNotNull prepend="," property="outerCategory">
+				      outer_category=#outerCategory#
+			</isNotNull>
+			<isNotNull prepend="," property="isCheckAgain">
+				      IS_CHECK_AGAIN=#isCheckAgain#
+			</isNotNull>
+			<isNotNull prepend="," property="compiler">
+				      COMPILER=#compiler#
+			</isNotNull>
+			<isNotNull prepend="," property="SUB_CATEGORY">
+				      SUB_CATEGORY=#SUB_CATEGORY#
+			</isNotNull>
+			<isNotNull prepend="," property="SUB_CATEGORY_INFO">
+				      SUB_CATEGORY_INFO=#SUB_CATEGORY_INFO#
+			</isNotNull>
+			<isNotNull prepend="," property="pubPerson">
+				      PUB_PERSON=#pubPerson#
+			</isNotNull>
+			<isNotNull prepend="," property="pubDate">
+				      PUB_DATE=to_date(#pubDate#,'yyyy-MM-dd hh24:mi:ss')
+			</isNotNull>
+			<isNotNull prepend="," property="pubTextNum">
+				      PUB_TEXT_NUM=#pubTextNum#
+			</isNotNull>
+			<isNotNull prepend="," property="pubDapt">
+				      PUB_DAPT=#pubDapt#
+			</isNotNull>
+			<isNotNull prepend="," property="inplementDate">
+				      INPLEMENT_DATE=to_date(#inplementDate#,'yyyy-MM-dd hh24:mi:ss')
+			</isNotNull>
+			<isNotNull prepend="," property="timeliness">
+				      TIMELINESS=#timeliness#
+			</isNotNull>
+			<isNotNull prepend="," property="caption">
+				      CAPTION=#caption#
+			</isNotNull>
+			 where 	statute_id = #statuteId#
+		</dynamic>	
+	</update>
+	
+	
+	<delete id="deleteTextStatute" parameterClass="String">
+   		delete from text_statute where statute_id = #statuteId#
+	</delete>
+	
+	
+	
+	
+	<!--提供编辑页面初始化 -->
+	<select id="getTextStatuteDetail" parameterClass="java.lang.String" resultClass="textStatute">
+   	  select statute_id as statuteId, statute_title as statuteTitle, sub_statute_title as substatuteTitle, 
+		  statute_content as statuteContent, statute_tags as statuteTagsStr, category, 
+		  entry_user as entryUser,to_char(n.entry_date,'yyyy-MM-dd hh24:mi:ss')as entryDate, approvaler, 
+		  is_photos_show as isPhotosShow, photo_url as photoUrl, n.is_del as isDel, 
+		  flag, to_char(n.create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, n.create_by as createBy, 
+		  gov_use_flag as govUseFlag, statute_author as statuteAuthor, entry_dept as entryDept,dept_name as deptName, 
+		  statute_source as statuteSource, is_public as isPublic,
+		  n.merge_id as mergeId,n.outer_statute_id as outerstatuteId,IS_OLDDATA as isOldData,outer_Category as outerCategory,
+		  IS_CHECK_AGAIN as isCheckAgain,COMPILER as compiler,n.SUB_CATEGORY SUB_CATEGORY,n.SUB_CATEGORY_INFO SUB_CATEGORY_INFO,
+		  n.PUB_PERSON as pubPerson, to_char(n.PUB_DATE,'yyyy-MM-dd hh24:mi:ss') as pubDate,n.PUB_TEXT_NUM as pubTextNum,n.PUB_DAPT as pubDapt,to_char(n.INPLEMENT_DATE,'yyyy-MM-dd hh24:mi:ss') as inplementDate,n.TIMELINESS as timeliness,n.CAPTION as caption 
+   	  from   text_statute n
+   	  where  n.statute_id=#statuteId#
+	</select>
+	
+	
+
+	
+	 
+</sqlMap>

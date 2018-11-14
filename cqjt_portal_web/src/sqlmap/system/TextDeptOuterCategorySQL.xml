@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+ PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+ "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="DeptOuterCategory">
+   <!--查询外网栏目信息-->	
+   <select id="getOuterCategoryById"  parameterClass="map"  resultClass="textDeptOuterCategory">
+	   select DOC_ID as docId,DEPT_ID as deptId,OUTER_CATEGORY_NAME as outCategoryName,
+	   		OUTER_CATEGORY_ID as outCategoryId,FLAG as flag
+	   	from TEXT_DEPT_OUTER_CATEGORY
+	   	where IS_DEL='0'
+	   	<dynamic>
+		   <isNotEmpty prepend="and" property="depId">
+			 DEPT_ID =#depId#	
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="outCategoryId">
+			 OUTER_CATEGORY_ID =#outCategoryId#	
+		   </isNotEmpty>
+	   	</dynamic> 
+   </select>
+   
+</sqlMap>

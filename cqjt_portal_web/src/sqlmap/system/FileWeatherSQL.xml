@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--资料下载     20140612 gyf-->
+<sqlMap namespace="FileWeather">
+		<!--获取所有资料 -->
+		<select id="getFileAll" parameterClass="map" resultClass="fileDownload">
+			select file_id as fileId,file_name as fileName,file_desc as fileDesc,
+				file_path as filePath, is_del as isDel, 
+				to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate,
+				create_by as createBy,is_top as isTop,attachment,file_size as fileSize,
+				file_type fileType
+			from file_Weather
+			where is_del=#isDel#
+			<dynamic>
+			   <isNotEmpty prepend="and" property="fileName">
+				 file_name like '%'||#fileName#||'%'	
+			   </isNotEmpty> 
+			   <isNotEmpty prepend="and" property="startDate">
+		      	 create_date >=#startDate#
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="endDate">
+			     create_date  
+			     <![CDATA[  <=#endDate#]]>
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="fileType">
+				 file_Type = #fileType#
+			   </isNotEmpty> 
+			</dynamic>
+			order by is_top desc,create_date desc
+		</select>
+
+		<!--根据fileId查询资料-->
+		<select id="getFileByFileId" parameterClass="String" resultClass="fileDownload">
+			select file_id as fileId,file_name as fileName,file_desc as fileDesc,
+				file_path as filePath,is_del as isDel,to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate,
+				create_by as createBy,is_top as isTop,attachment,file_size as fileSize,file_type fileType
+			from file_Weather
+			where is_del='0' and file_id=#fileId#
+		</select> 
+		<!--更新 -->
+		<update id="updateFile" parameterClass="fileDownload">
+			update file_weather 
+			set 
+			<dynamic>
+			   <isNotEmpty  property="isDel">
+				 	is_del=#isDel#
+			   </isNotEmpty> 
+			   <isEmpty  property="isDel">
+				   	file_name=#fileName#,
+					file_desc=#fileDesc#,
+					file_path=#filePath#,
+					is_top = #isTop#,
+					attachment = #attachment#,	
+					file_size = #fileSize#
+			   </isEmpty>
+			</dynamic>
+			where file_id=#fileId#
+		</update>
+        <!--增加上传资料 -->
+        <insert id="addFile" parameterClass="fileDownload" >
+			insert into file_weather (
+				file_id, file_name, file_desc, file_path, is_del, 
+				create_date, create_by,is_top,attachment,file_size,file_type
+			) values (
+				#fileId#, #fileName#, #fileDesc#, #filePath#, '0', 
+				to_date(#createDate#,'yyyy/MM/dd hh24:mi:ss'), #createBy#,#isTop#,#attachment#,#fileSize#,#fileType#)
+		</insert>
+       <!--首页获取时间倒序的后10条 -->
+		<select id="getFile" parameterClass="map" resultClass="fileDownload">
+				select file_id as fileId,file_name as fileName,file_desc as fileDesc,
+				file_path as filePath, is_del as isDel, 
+				to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate,
+				create_by as createBy,is_top as isTop,attachment,file_size as fileSize,file_type fileType
+			from file_weather
+			where is_del=#isDel#
+			<dynamic>
+			   <isNotEmpty prepend="and" property="fileName">
+				 file_name like '%'||#fileName#||'%'	
+			   </isNotEmpty> 
+			   <isNotEmpty prepend="and" property="startDate">
+		      	 create_date >=#startDate#
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="endDate">
+			     create_date  
+			     <![CDATA[  <=#endDate#]]>
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="fileType">
+				 file_Type = #fileType#
+			   </isNotEmpty> 
+			</dynamic>
+			order by is_top desc,create_date desc
+		</select>
+</sqlMap>

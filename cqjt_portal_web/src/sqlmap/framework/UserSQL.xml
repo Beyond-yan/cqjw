@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Users">
+	<!-- modified by Cube @130724. added the role info of the user. -->
+	<select id="queryUserByCode" parameterClass="String"
+		resultClass="Users">
+		SELECT d.user_id as userId, a.USER_NAME AS userNo, a.USER_PASSWORD AS password,
+		 a.CREATE_DATE AS createDate, a.CREATE_USER AS createUserno,
+		 a.UPDATE_DATE AS updateDate, a.UPDATE_USER AS updateUserNo,
+		 a.STATUS AS userStatus, NVL(d.USER_NAME, GET_SCHEMA_USER_NAME(A.USER_NAME)) as userName, 
+		 C.ROLE_ID AS roleID, C.ROLE_NAME AS roleName, C.DESCRIPTION AS roleDesc,
+		 e.DEPT_ID as deptId, e.DEPT_NAME as deptName, GET_SCHEMA_USER_EMAIL(A.USER_NAME) as userEmail 
+		FROM OA_COMMON.SYS_USER_ALL a
+		LEFT JOIN SYS_USERS d ON d.USER_NO = A.USER_NAME
+        LEFT JOIN SYS_USER_ROLE b ON B.USER_ID=d.USER_ID
+        LEFT JOIN SYS_ROLE c ON B.ROLE_ID = C.ROLE_ID
+        LEFT JOIN SYS_DEPARTMENT e ON e.DEPT_ID = d.DEPT_ID
+		WHERE upper(a.USER_NAME) = upper(#userNo#) AND a.STATUS = 1
+	</select>
+
+	<select id="Login" parameterClass="Users" resultClass="Users">
+		select ID AS userId, USER_NAME AS userNo, USER_PASSWORD AS password,
+		 CREATE_DATE AS createDate, CREATE_USER AS createUserno,
+		 UPDATE_DATE AS updateDate, UPDATE_USER AS updateUserNo,
+		 STATUS AS userStatus
+		from OA_COMMON.SYS_USER_ALL
+		where
+		upper(USER_NAME) = upper(#userNo#)
+		and USER_PASSWORD = #password#
+		and STATUS = 1
+	</select>
+	
+	<!--通过userno 获取签发人-->
+	<select id="getApprovers" parameterClass="String" resultClass="Users">
+		select approver as userName from text_user_approver
+		where user_no=#userNo#
+	</select>
+	<!--通过username获取签发人-->
+	<select id="getApp" parameterClass="String" resultClass="Users">  
+                select a.approver as userName ,b.user_name 
+                from  TEXT_USER_APPROVER a ,SYS_USERS b 
+                where  b.user_no =a.user_no and b.user_name =#userName#
+              
+	</select>	
+	<!--enable=1 可用的用户信息-->
+	<select id="SelectUser" parameterClass="Map"
+		resultClass="Users">
+		SELECT a.USER_ID userId,
+		a.USER_NO userNo,
+		b.SEQUENCE_NUM as sequenceNum,
+		a.CREATE_DATE createDate,
+		a.CREATE_USERNO
+		createUserno,
+		a.UPDATE_DATE updateDate,
+		a.UPDATE_USERNO updateUserNo,
+		a.ENABLED userStatus,
+		a.USER_NAME userName,
+		a.DEPT_ID deptID,
+		B.DEPT_NAME AS deptName,
+		d.DESCRIPTION AS roleDesc,
+		D.ROLE_NAME AS roleName
+		FROM SYS_USERS a
+		JOIN SYS_DEPARTMENT b
+		ON A.DEPT_ID = B.DEPT_ID AND A.ENABLED = '1'
+		JOIN SYS_USER_ROLE c
+		ON A.USER_ID = C.USER_ID
+		JOIN SYS_ROLE d
+		ON
+		C.ROLE_ID = D.ROLE_ID
+		where is_del='0'
+		<dynamic>
+			<isNotEmpty prepend="and" property="userNo">
+				a.user_no LIKE '%' ||decode(#userNo#,'',user_no,#userNo#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="roleName">
+				d.role_name LIKE '%' ||decode(#roleName#,'',role_name,#roleName#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="deptID">
+				b.dept_ID = #deptID#
+			</isNotEmpty>
+		</dynamic>
+		ORDER BY sequenceNum asc
+	</select>
+	
+	<!-- 编辑时查询出来的数据 H2902992 2014/06/03 -->
+	<select id="EditUserInfo" parameterClass="String" resultClass="Users">
+		SELECT a.USER_ID userId,
+		 a.USER_NO userNo,
+		 a.CREATE_DATE createDate,
+		 a.CREATE_USERNO
+		 createUserno,
+		 a.UPDATE_DATE updateDate,
+		 a.UPDATE_USERNO updateUserNo,
+		 a.ENABLED userStatus,
+		 a.USER_NAME userName,
+		 a.DEPT_ID deptID,
+		 B.DEPT_NAME AS deptName,
+		 d.DESCRIPTION AS roleDesc,
+		 D.ROLE_NAME AS roleName,
+		 D.ROLE_ID as roleID
+		FROM SYS_USERS a
+		JOIN SYS_DEPARTMENT b ON A.DEPT_ID = B.DEPT_ID AND A.ENABLED = '1'
+		JOIN SYS_USER_ROLE c ON A.USER_ID = C.USER_ID
+		JOIN SYS_ROLE d ON C.ROLE_ID = D.ROLE_ID
+		where user_id=#userId#
+	</select>
+	
+	<!--userNox唯一验证 H2602965  2014.06.04 -->
+    <select id="queryUserUniqueByCode" parameterClass="String" resultClass="Users">
+   	  select user_No as userNo 
+   	  from sys_users 
+   	  where ENABLED='1' and user_no=#userNo#
+    </select>
+    
+	
+	
+	
+	
+	
+    <delete id="DeleteUser" parameterClass="java.lang.String">
+   	    delete from sys_users where user_id = #userId#
+    </delete>
+   
+    <update id="UpdateUser" parameterClass="java.lang.String">
+   	    update sys_users set enabled='0' where user_id = #userId#
+    </update>
+   
+<!--    H2902990 20140604 -->
+    <update id="UpdateUserInfo" parameterClass="Users">
+   	    update sys_users set 
+   	      user_name=#userName#,
+   	      dept_id=#deptID#,
+   	      enabled=#userStatus#, 
+   	      update_date=to_date(#updateDate#,'yyyy-MM-dd hh24:mi:ss'),
+   	      update_userno=#updateUserNo# 
+   	    where user_no = #userNo#
+    </update>
+   
+   
+    <!--插入用户信息 修改H2602965 2014.06.04 -->
+    <insert id="AddUser" parameterClass="Users">
+     insert into sys_users 
+     (USER_ID ,USER_NO,USER_NAME,DEPT_ID,ENABLED,
+     CREATE_DATE,CREATE_USERNO,UPDATE_DATE,UPDATE_USERNO)
+     values (
+	  #userId#,#userNo#,#userName#, #deptID#,#userStatus#, 
+	  to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'),
+	  #createUserNo#,to_date(#updateDate#,'yyyy-MM-dd hh24:mi:ss'),#updateUserNo# 
+	) 
+	
+   </insert>
+   
+   
+   
+	<!-- 查询 OA_COMMON.SYS_USER_ALL表中可以使用的userName  通过 userNo模糊查询-->
+	<select id="queryUserAllByOA" parameterClass="Map" resultClass="Users">
+	  SELECT a.USER_NAME AS userNo, b.user_name as userName
+	    FROM OA_COMMON.SYS_USER_ALL a
+	         LEFT JOIN Portal.SYS_USERS b ON a.user_name = b.user_no
+	   WHERE a.STATUS = '1'
+	   <dynamic>
+			<isNotEmpty prepend="and" property="userNo">
+				a.USER_NAME LIKE '%' ||decode(#userNo#,'',a.USER_NAME,#userNo#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="userName">
+				b.USER_NAME LIKE '%' ||decode(#userName#,'',b.USER_NAME,#userName#) || '%'
+			</isNotEmpty>
+        </dynamic>
+	ORDER BY userName ASC	
+	</select>
+	
+	<!--修改密码-->
+	<update id="updatePassword" parameterClass="Map">
+		update OA_COMMON.SYS_USER_ALL
+		set USER_PASSWORD = #password#
+		where USER_NAME = #userNo#
+	</update>
+
+	<insert id="addOacommonUser" parameterClass="Users">
+	insert into OA_COMMON.sys_user_all(id,user_name,USER_PASSWORD,SCHEMA_ID,STATUS,CREATE_DATE) 
+	values(OA_COMMON.HIBERNATE_SEQUENCE.NEXTVAL,#userNo#,#password#,1,1,to_date(#createDate#,'yyyy-mm-dd hh24:mi:ss'))
+   </insert>
+	<insert id="addSchemaAppUser" parameterClass="Users">
+	insert into OA.app_user(USERID,USERNAME,TITLE,PASSWORD,MOBILE,EMAIL,STATUS,FULLNAME,DELFLAG) 
+	values(OA.HIBERNATE_SEQUENCE.NEXTVAL,#userNo#,1,#password#,#userMobile#,#userEmail#,1,#userName#,0)
+   </insert>
+   <update id="editOacommonUser" parameterClass="Map">
+		update OA_COMMON.sys_user_all set USER_PASSWORD = #password# where user_name =  #userNo#
+	</update>
+   <update id="editSchemaAppUser" parameterClass="Map">
+   		update oa.app_user set 
+   		
+   		MOBILE = #userMobile#
+   		,EMAIL = #userEmail#
+   		,FULLNAME = #userName#
+   		<isNotEmpty prepend="," property="password">
+   		USER_PASSWORD = #password#
+   		</isNotEmpty>
+   		 where user_name =  #userNo#
+   		
+	</update>
+	
+   <update id="delOacommonUser" parameterClass="java.lang.String">
+   		update OA_COMMON.sys_user_all set STATUS = 0 where user_name =  #userNo#
+	</update>
+   <update id="delSchemaAppUser" parameterClass="java.lang.String">
+   		update oa.app_user set STATUS = 0 where user_name =  #userNo#
+	</update>
+	
+	<select id="queryUserRelation" parameterClass="userRelationVo" resultClass="userRelationVo">
+	 select relaId,relaOaLoginId,relaYgjLoginId,relaLcLoginId from OA_COMMON.sys_user_relation where 1=1 
+	   <dynamic>
+			<isNotEmpty prepend="and" property="relaYgjLoginId">
+				relaYgjLoginId = #relaYgjLoginId#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="relaOaLoginId">
+				relaOaLoginId = #relaOaLoginId# 
+			</isNotEmpty>
+        </dynamic>
+	</select>
+</sqlMap>

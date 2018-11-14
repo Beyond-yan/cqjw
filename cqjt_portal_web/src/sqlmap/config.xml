@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMapConfig
+	PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+	<settings statementCachingEnabled="true" cacheModelsEnabled="false"
+		useStatementNamespaces="true" classInfoCacheEnabled="true" />
+		
+	<!-- 通过typeAlias使得我们在下面使用实体类的时候不需要写包名 -->	
+	<typeAlias alias="Menu" type="com.gdssoft.cqjt.pojo.Menu" />
+	<typeAlias alias="role" type="com.gdssoft.cqjt.pojo.Role" />
+	<typeAlias alias="rolePermission" type="com.gdssoft.cqjt.pojo.RolePermission" />
+	<typeAlias alias="UserRole" type="com.gdssoft.cqjt.pojo.UserRole" />
+	<typeAlias alias="Users" type="com.gdssoft.cqjt.pojo.UserDetail" />
+	<typeAlias alias="selectBean" type="com.gdssoft.cqjt.pojo.SelectBean" />
+	<typeAlias alias="textNews"  type="com.gdssoft.cqjt.pojo.TextNews"/>
+	<typeAlias alias="textStatute"  type="com.gdssoft.cqjt.pojo.TextStatute"/>
+	<typeAlias alias="textPerson"  type="com.gdssoft.cqjt.pojo.TextPerson"/>
+	<typeAlias alias="textCategory"  type="com.gdssoft.cqjt.pojo.TextCategory"/>
+	<typeAlias alias="resource" type="com.gdssoft.cqjt.pojo.AuthorityResource" />
+	
+	<!--2014.05.30  H2602965-->
+	<typeAlias alias="Dept"  type="com.gdssoft.cqjt.pojo.Department"/>
+	<!--2014.05.30  H2602975 -->
+	<typeAlias alias="TextGovInfo"  type="com.gdssoft.cqjt.pojo.TextGovInfo"/>
+	<!--2014.06.04  H2602975 -->
+	<typeAlias alias="TextPublication"  type="com.gdssoft.cqjt.pojo.TextPublication"/> 
+	<!--2014.06.12  H2601917 -->
+	<typeAlias alias="fileDownload"  type="com.gdssoft.cqjt.pojo.FileDownload"/>  
+	<!--2014.06.16  H2602975-->
+	<typeAlias alias="deptScore"  type="com.gdssoft.cqjt.pojo.DepartmentScore"/>  
+	<!--2014.06.18  H2602992-->
+	<typeAlias alias="videoNews"  type="com.gdssoft.cqjt.pojo.videoNews.VideoNews"/>  
+	<!--2014.06.20  H2602975-->
+	<typeAlias alias="checkStandard"  type="com.gdssoft.cqjt.pojo.CheckStandard"/>  
+	<!--2014.06.30  H2602975-->
+	<typeAlias alias="govCheckReport"  type="com.gdssoft.cqjt.pojo.report.GovCheckReport"/> 
+	<!--2014.06.30  gyf -->
+	<typeAlias alias="textGovReport"  type="com.gdssoft.cqjt.pojo.TextGovReport"/>
+	<!--2014.07.1  H2602965 -->
+	<typeAlias alias="siteCheckReport"  type="com.gdssoft.cqjt.pojo.report.siteCheckReport"/>
+	<!--2014.07.1  H2602992 -->
+	<typeAlias alias="siteReport"  type="com.gdssoft.cqjt.pojo.report.SiteReport"/>
+	<!--2014.07.02  H2602992 -->
+	<typeAlias alias="accountReport"  type="com.gdssoft.cqjt.pojo.report.AccountReport"/>
+	<!--2014.07.07  H2603282 -->
+	<typeAlias alias="magazine"  type="com.gdssoft.cqjt.pojo.content.Magazine"/>
+
+	<!--2014.07.09 zhangpeng -->
+	<typeAlias alias="categoryRelation"  type="com.gdssoft.cqjt.pojo.CategoryRelation"/>
+
+	<!--2014.07.08  gyf -->
+	<typeAlias alias="textData"  type="com.gdssoft.cqjt.pojo.content.TextData"/> 
+	
+	<!--2014.07.14  H2603282 -->
+	<typeAlias alias="picture"  type="com.gdssoft.cqjt.pojo.content.Picture"/>  
+
+	<!--2014.07.15 H2602965 -->
+	<typeAlias alias="videoMgt"  type="com.gdssoft.cqjt.pojo.content.VideoMgt"/>
+	 
+	<!--2014.07.22 H2603282 -->
+	<typeAlias alias="videoRecord"  type="com.gdssoft.cqjt.pojo.videoNews.VideoRecord"/> 
+	
+	<typeAlias alias="textDeptOuterCategory" type="com.gdssoft.cqjt.pojo.TextDeptOuterCategory" />
+	
+	<!--2015.01.16  H2601917 -->
+	<typeAlias alias="checkHistory"  type="com.gdssoft.cqjt.pojo.CheckHistory"/> 
+	<!--2015.01.30  H2602965 -->
+	<typeAlias alias="logCount"  type="com.gdssoft.cqjt.pojo.LogCount"/> 
+	<!--2015.08.06  -->
+	<typeAlias alias="trafficRunVo"  type="com.gdssoft.cqjt.pojo.TrafficRunVo"/>
+	<!-- 2015.12.08 -->  
+	<typeAlias alias="SpecialInformationVo" type="com.gdssoft.cqjt.pojo.SpecialInformationVo"/>
+	<!-- 2016.01.07 GuoY  -->
+	<typeAlias alias="infoWorkNotice" type="com.gdssoft.cqjt.pojo.InfoWorkNotice"/>
+	
+	<typeAlias alias="SubscribeVo" type="com.gdssoft.cqjt.pojo.SubscribeVo"/>
+	<typeAlias alias="userRelationVo" type="com.gdssoft.cqjt.pojo.UserRelationVo"/>
+	
+	<typeAlias alias="govNewsReport" type="com.gdssoft.cqjt.pojo.report.GovNewsReport"/>
+	<typeAlias alias="govSiteCheckReport" type="com.gdssoft.cqjt.pojo.report.GovSiteCheckReport"/>
+	<!-- 2017.3.17 -->
+	<typeAlias alias="empShow" type="com.gdssoft.cqjt.pojo.content.EmpShow"/>
+	<typeAlias alias="redBlackQueryRecord" type="com.gdssoft.cqjt.pojo.RedBlackQueryRecord"/>
+	
+	<sqlMap resource="sqlmap/framework/UserSQL.xml" />
+	<sqlMap resource="sqlmap/framework/MenuSQL.xml" />
+	<sqlMap resource="sqlmap/framework/RoleSQL.xml" />
+	<sqlMap resource="sqlmap/framework/UserRoleSQL.xml" />
+	<sqlMap resource="sqlmap/framework/UtilSQL.xml" />
+	<sqlMap resource="sqlmap/framework/ResourceSQL.xml" />
+	<sqlMap resource="sqlmap/system/TextNewsSQL.xml" />
+	<sqlMap resource="sqlmap/system/TextStatuteSQL.xml" />
+	<sqlMap resource="sqlmap/framework/logCount.xml" />
+	
+	
+	<!--2014.05.30  H2602965-->
+	<sqlMap resource="sqlmap/system/DepartmentSQL.xml" />
+	<!--2014.05.30  H2602975-->
+	<sqlMap resource="sqlmap/system/TextGovInfoSQL.xml" />
+	<!--2014.06.04  H2602975-->
+	<sqlMap resource="sqlmap/system/TextPublicationSQL.xml" />
+	<!--2014.06.12  H2601917-->
+	<sqlMap resource="sqlmap/system/FileDownloadSQL.xml" />
+	<!--2014.06.16  H2602975-->
+	<sqlMap resource="sqlmap/system/DepartmentScoreSQL.xml" />
+	<!--2014.06.18  H2602992-->
+	<sqlMap resource="sqlmap/system/VideoNewsSQL.xml" />
+	<!--2014.06.20  H2602975-->
+	<sqlMap resource="sqlmap/system/CheckStandardSQL.xml" />
+	<!--2014.06.30  H2602975 -->
+	<sqlMap resource="sqlmap/system/report/ReportFormSQL.xml" />
+	<!--2014.07.03  H2601917-->
+	<sqlMap resource="sqlmap/system/TextCategorySQL.xml" />
+	<!--2014.07.07  H2603282-->
+    <sqlMap resource="sqlmap/system/content/MagazineNewsSQL.xml" />
+    <!--2014.07.08  gyf-->
+    <sqlMap resource="sqlmap/system/content/TextDataSQL.xml" />
+    <!--2014.07.14  H2603282-->
+    <sqlMap resource="sqlmap/system/content/PictureNewsSQL.xml" />
+    <!--2014.07.15  H2602965-->
+    <sqlMap resource="sqlmap/system/content/VideoMgtSQL.xml" />
+     <!--2014.07.22  H2603282-->
+    <sqlMap resource="sqlmap/system/VideoRecordSQL.xml" />
+    
+    <sqlMap resource="sqlmap/system/TextDeptOuterCategorySQL.xml" />
+    <!--2015.01.16  H2601917-->
+	<sqlMap resource="sqlmap/system/CheckHistorySQL.xml" />
+	
+	<!-- 2015.05.27 -->
+	<sqlMap resource="sqlmap/system/FileWeatherSQL.xml" />
+	<!-- 2015.08.06 -->
+	<sqlMap resource="sqlmap/system/TrafficRunSql.xml" />
+	<!-- 2015.12.08 -->
+	<sqlMap resource="sqlmap/system/SpecialInformationSql.xml" />
+	<!-- 2016.01.07 GuoY  -->
+	<sqlMap resource="sqlmap/system/InfoWorkNoticeSQL.xml"/>
+	<sqlMap resource="sqlmap/system/SubscribeSql.xml"/>
+	<sqlMap resource="sqlmap/system/report/GovSiteCheckReportSQL.xml"/>
+	<!-- 2017.03.16  -->
+	<sqlMap resource="sqlmap/system/TextPersonSQL.xml"/>
+	<!-- 2017.03.17  -->
+	<sqlMap resource="sqlmap/system/content/EmpShowSQL.xml"/>
+	<sqlMap resource="sqlmap/system/RedBlackQueryRecordSQL.xml"/>
+
+	
+</sqlMapConfig>
+	

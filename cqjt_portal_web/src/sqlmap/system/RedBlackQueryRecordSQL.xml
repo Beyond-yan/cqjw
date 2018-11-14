@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+	 PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+	 "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="RedBlackQueryRecord">
+
+	<insert id="insert" parameterClass="redBlackQueryRecord">
+   	insert into red_black_query_record(
+   	  id, red_num, red_des, black_num, black_des, query_name, user_id, create_time, result, status, request_id, detail_ids, commit_detail_ids, update_time, commit_info
+	) values (
+	  #id#, #redNum#, #redDes#, #blackNum#, #blackDes#, #queryName#, #userId#, #createTime#, #result#, #status#, #requestId#, #detailIds#, #commitDetailIds#, #updateTime#, #commitInfo#
+		)
+	</insert>
+   
+	<delete id="delete" parameterClass="String">
+   	delete from red_black_query_record where id = #id#
+	</delete>
+   
+	<update id="update" parameterClass="redBlackQueryRecord">
+     update red_black_query_record
+		<dynamic prepend="set">
+			<isNotNull prepend="," property="id">
+				id=#id#
+			</isNotNull>
+			<isNotNull prepend="," property="redNum">
+				red_num=#redNum#
+			</isNotNull>
+			<isNotNull prepend="," property="redDes">
+				red_des=#redDes#
+			</isNotNull>
+			<isNotNull prepend="," property="blackNum">
+				black_num=#blackNum#
+			</isNotNull>
+			<isNotNull prepend="," property="blackDes">
+				black_des=#blackDes#
+			</isNotNull>
+			<isNotNull prepend="," property="queryName">
+				query_name=#queryName#
+			</isNotNull>
+			<isNotNull prepend="," property="userId">
+				user_id=#userId#
+			</isNotNull>
+			<isNotNull prepend="," property="createTime">
+				create_time=#createTime#
+			</isNotNull>
+			<isNotNull prepend="," property="result">
+				result=#result#
+			</isNotNull>
+			<isNotNull prepend="," property="status">
+				status=#status#
+			</isNotNull>
+			<isNotNull prepend="," property="requestId">
+				request_id=#requestId#
+			</isNotNull>
+			<isNotNull prepend="," property="detailIds">
+				detail_ids=#detailIds#
+			</isNotNull>
+			<isNotNull prepend="," property="commitDetailIds">
+				commit_detail_ids=#commitDetailIds#
+			</isNotNull>
+			<isNotNull prepend="," property="updateTime">
+				update_time=#updateTime#
+			</isNotNull>
+			<isNotNull prepend="," property="commitInfo">
+				commit_info=#commitInfo#
+			</isNotNull>
+			
+			 where 	id = #id#
+		</dynamic>	
+	</update>
+
+	<select id="getByUserId" parameterClass="java.lang.String" resultClass="redBlackQueryRecord">
+   	  select id as id, red_num as redNum, red_des as redDes, black_num as blackNum, black_des as blackDes, query_name as queryName, user_id as userId, create_time as createTime, result as result, status as status, request_id as requestId, detail_ids as detailIds, commit_detail_ids as commitDetailIds, update_time as updateTime, commit_info as commitInfo
+   	  from red_black_query_record t
+   	  where  t.user_id=#userId# order by t.create_time DESC
+	</select>
+
+	<select id="getById" parameterClass="java.lang.String" resultClass="redBlackQueryRecord">
+		select id as id, red_num as redNum, red_des as redDes, black_num as blackNum, black_des as blackDes, query_name as queryName, user_id as userId, create_time as createTime, result as result, status as status, request_id as requestId, detail_ids as detailIds, commit_detail_ids as commitDetailIds, update_time as updateTime, commit_info as commitInfo
+		from red_black_query_record t
+		where  t.id=#id#
+	</select>
+
+	<select id="queryCount" parameterClass="Map" resultClass ="Integer">
+		SELECT
+			count(id)
+		FROM red_black_query_record t
+		WHERE 1=1
+		<dynamic>
+			<isNotEmpty prepend=" and " property="redBlackQueryRecord.id">
+				id = #redBlackQueryRecord.id#
+			</isNotEmpty>
+			<isNotEmpty prepend=" and " property="redBlackQueryRecord.userId">
+				user_id = #redBlackQueryRecord.userId#
+			</isNotEmpty>
+			<isNotEmpty prepend=" and " property="redBlackQueryRecord.beginCreateTime">
+				<![CDATA[ create_time >= #redBlackQueryRecord.beginCreateTime# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend=" and " property="redBlackQueryRecord.endCreateTime">
+				<![CDATA[ create_time <= #redBlackQueryRecord.endCreateTime# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend=" and " property="redBlackQueryRecord.status">
+				status = #redBlackQueryRecord.status#
+			</isNotEmpty>
+			<isNotEmpty prepend=" and " property="redBlackQueryRecord.requestId">
+				request_id = #redBlackQueryRecord.requestId#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<sql id="queryListSql">
+		SELECT
+		id as id, red_num as redNum, red_des as redDes, black_num as blackNum, black_des as blackDes, query_name as queryName, user_id as userId, create_time as createTime, result as result, status as status, request_id as requestId, detail_ids as detailIds, commit_detail_ids as commitDetailIds, update_time as updateTime, commit_info  as commitInfo
+		FROM red_black_query_record t
+		WHERE 1=1
+		<dynamic>
+			<isNotEmpty prepend=" and " property="redBlackQueryRecord.id">
+				id = #redBlackQueryRecord.id#
+			</isNotEmpty>
+			<isNotEmpty prepend=" and " property="redBlackQueryRecord.userId">
+				user_id = #redBlackQueryRecord.userId#
+			</isNotEmpty>
+			<isNotEmpty prepend=" and " property="redBlackQueryRecord.beginCreateTime">
+				<![CDATA[ create_time >= #redBlackQueryRecord.beginCreateTime# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend=" and " property="redBlackQueryRecord.endCreateTime">
+				<![CDATA[ create_time <= #redBlackQueryRecord.endCreateTime# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend=" and " property="redBlackQueryRecord.status">
+				status = #redBlackQueryRecord.status#
+			</isNotEmpty>
+			<isNotEmpty prepend=" and " property="redBlackQueryRecord.requestId">
+				request_id = #redBlackQueryRecord.requestId#
+			</isNotEmpty>
+		</dynamic>
+		order by createTime desc
+	</sql>
+	<select id="queryPageList" parameterClass="Map" resultClass ="redBlackQueryRecord">
+		<![CDATA[ SELECT * FROM ( SELECT A.*, ROWNUM RN FROM  (]]>
+		<include refid="queryListSql" />
+		<![CDATA[ ) A WHERE ROWNUM <= #endLimit# ) WHERE RN > #beginLimit#]]>
+	</select>
+
+</sqlMap>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/tx 
+	    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+	    http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring  
+  		http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring/ehcache-spring-1.1.xsd">
+    
+	<bean id="propertyConfigurer2" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="order" value="2" />
+    	<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<property name="locations">
+			<list>
+				<value>classpath:jdbc.properties</value>
+			</list>
+		</property>
+		<property name="fileEncoding">
+			<value>UTF-8</value>
+		</property>
+	</bean>
+	
+	<bean id="nativeJdbcExtractor"
+		class="org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor"
+		lazy-init="true" />
+	<bean id="oracleLobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler"
+		lazy-init="true">
+		<property name="nativeJdbcExtractor">
+			<ref local="nativeJdbcExtractor" />
+		</property>
+	</bean>
+	
+	<bean id="dataSource" class="com.gdssoft.core.tools.DecodeBasicDataSource" 
+		destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.user}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="maxIdle" value="50"/>
+        <property name="maxActive" value="150"/>
+        <!--当pool为空时最多等10秒-->
+        <property name="maxWait" value="10000"/>
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="defaultAutoCommit" value="true"/>
+    </bean>
+
+	<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocations">
+			<value>classpath:sqlmap/config.xml</value>
+		</property>
+		<property name="lobHandler">
+			<ref local="oracleLobHandler" />
+		</property>
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="sqlMapClientTemplate" class="com.gdssoft.core.dao.MySqlMapClientTemplate">
+		<property name="enablePaging" value="true" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+
+
+	<bean id="cmsDataSource" class="com.gdssoft.core.tools.DecodeBasicDataSource"
+		destroy-method="close">
+        <property name="driverClassName" value="${cms.jdbc.driverClassName}"/>
+        <property name="url" value="${cms.jdbc.url}"/>
+        <property name="username" value="${cms.jdbc.user}"/>
+        <property name="password" value="${cms.jdbc.password}"/>
+        <property name="maxIdle" value="50"/>
+        <property name="maxActive" value="150"/>
+        <!--当pool为空时最多等10秒-->
+        <property name="maxWait" value="10000"/>
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="defaultAutoCommit" value="true"/>
+    </bean>
+
+	<bean id="cmsSqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocations">
+			<value>classpath:sqlmap/system/cms/config.xml</value>
+		</property>
+		<property name="lobHandler">
+			<ref local="oracleLobHandler" />
+		</property>
+		<property name="dataSource" ref="cmsDataSource" />
+	</bean>
+
+	<bean id="cmsSqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+		<property name="sqlMapClient" ref="cmsSqlMapClient" />
+	</bean>
+
+	<!-- 政务外网数据源配置 start -->
+	<bean id="wwDataSource" class="com.gdssoft.core.tools.DecodeBasicDataSource"
+		  destroy-method="close">
+		<property name="driverClassName" value="${ww.jdbc.driverClassName}"/>
+		<property name="url" value="${ww.jdbc.url}"/>
+		<property name="username" value="${ww.jdbc.user}"/>
+		<property name="password" value="${ww.jdbc.password}"/>
+		<property name="maxIdle" value="50"/>
+		<property name="maxActive" value="150"/>
+		<!--当pool为空时最多等10秒-->
+		<property name="maxWait" value="10000"/>
+		<property name="poolPreparedStatements" value="true"/>
+		<property name="defaultAutoCommit" value="true"/>
+	</bean>
+
+	<bean id="wwSqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocations">
+			<value>classpath:sqlmap/system/ww/config.xml</value>
+		</property>
+		<property name="lobHandler">
+			<ref local="oracleLobHandler" />
+		</property>
+		<property name="dataSource" ref="wwDataSource" />
+	</bean>
+
+	<bean id="wwSqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+		<property name="sqlMapClient" ref="wwSqlMapClient" />
+	</bean>
+	<!-- 政务外网数据源配置 end -->
+
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean id="ibatisTransactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- 配置事务特性 rollback-for:回滾 -->
+	<tx:advice id="ibatisTxAdvice" transaction-manager="ibatisTransactionManager">
+		<tx:attributes>
+			<tx:method name="load*" read-only="true" />
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="select*" read-only="true" />
+			<tx:method name="create*" propagation="REQUIRED"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="save*" propagation="REQUIRED"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="update*" propagation="REQUIRED"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="delete*" propagation="REQUIRED"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="insert*" propagation="REQUIRED" read-only="false"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="add*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+			<tx:method name="modify*" propagation="REQUIRED"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="validate*" propagation="REQUIRED"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="check*" propagation="REQUIRED"
+				rollback-for="java.lang.Exception" />
+
+			<tx:method name="*" />
+		</tx:attributes>
+	</tx:advice>
+
+
+</beans>

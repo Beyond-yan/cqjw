@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--资料下载     20140612 gyf-->
+<sqlMap namespace="TrafficRunDao">
+	<sql id="sql_column">
+		runnId,runnTitle,runnContent,runnDel,runnTop,runnCreateDate,runnEditDate,runnCreateUserName
+	</sql>
+
+	<sql id="sql_where">
+		run.runnDel = 0
+		<dynamic>
+			<isNotEmpty prepend="and" property="runnTitle">
+				run.runnTitle like '%'||#runnTitle#||'%'	
+			</isNotEmpty> 
+			<isNotEmpty prepend="and" property="beginDate">
+		      	run.runnCreateDate >=#beginDate#
+		    </isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+			   <![CDATA[  run.runnCreateDate <=#endDate#]]>
+			</isNotEmpty>
+		</dynamic>
+		order by run.runnTop desc nulls last,run.runnCreateDate desc
+	</sql>
+	
+	<insert id="insert" parameterClass="trafficRunVo">
+		insert into portl_traffic_run(runnId,runnTitle,runnContent,runnTop,runnCreateDate,runnCreateUserName) 
+		values(#runnId#,#runnTitle#,#runnContent#,#runnTop#,#runnCreateDate#,#runnCreateUserName#)
+		
+	</insert>
+	<update id="edit"  parameterClass="trafficRunVo">
+		update portl_traffic_run set 
+			runnTitle=#runnTitle#,runnContent=#runnContent#,runnTop=#runnTop#,runnEditDate=#runnEditDate# 
+		where runnId = #runnId#
+	</update>
+	<update id="del"  parameterClass="String">
+		update portl_traffic_run set runnDel = 1
+		where runnId = #runnId#
+	</update>
+	<delete id="remove"  parameterClass="String">
+		delete from portl_traffic_run where runnId = #runnId#
+	</delete>
+	
+	<select id="query" parameterClass="String" resultClass ="trafficRunVo">
+		select <include refid="sql_column"/> from portl_traffic_run run where runnId = #runnId#
+	</select>
+	<select id="queryCount" parameterClass="Map" resultClass ="Integer">
+		select count(1) from portl_traffic_run run where 
+		<include refid="sql_where"/>
+			
+	</select>
+	<select id="queryList" parameterClass="Map" resultClass ="trafficRunVo">
+		select * from portl_traffic_run run where 
+		<include refid="sql_where"/>
+	</select>
+	<select id="queryPageList" parameterClass="Map" resultClass ="trafficRunVo">
+		SELECT * FROM (
+            SELECT run.*,ROWNUM  FROM portl_traffic_run run WHERE
+			<include refid="sql_where"/>
+		) t
+		where ROWNUM>#beginLimit# and <![CDATA[ ROWNUM<=#endLimit# ]]> 
+	</select>
+	
+</sqlMap>

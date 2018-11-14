@@ -1,0 +1,32 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%><%@ taglib prefix="c" 
+	uri="http://java.sun.com/jsp/jstl/core"%><%@page 
+	import="com.gdssoft.core.tools.SystemContext"%><%@page 
+	import="com.gdssoft.core.security.service.SecurityManagerService"%>
+<%
+	SecurityManagerService securityManager = (SecurityManagerService)SystemContext
+				.getBean("securityManager");
+%>
+<!--Header Start-->
+<div class="header">
+	<a href="${pageContext.request.contextPath}/" class="logo"></a>
+    <ul class="nav">                                 
+    	<li><a href="index.xhtml">首页</a></li>
+        <li><a href="${pageContext.request.contextPath}/guest/news.xhtml?face=trafficView">交通政务</a>
+        	<ul class="dropDown">
+        		<li><a href="${pageContext.request.contextPath}/guest/SearchContent.xhtml">部门上报</a></li>
+        	</ul>
+        </li>
+        <li><a href="${pageContext.request.contextPath}/guest/news.xhtml?face=publicView">公告公示</a></li>
+        
+        <li><a href="${pageContext.request.contextPath}/guest/person.xhtml?face=personList">人事变动</a></li>
+        <li><a href="${pageContext.request.contextPath}/guest/empShow.xhtml?face=empDisplay">员工展示</a></li>
+        <li><a href="${pageContext.request.contextPath}/guest/statute.xhtml?face=lawRegulations">法律法规</a></li>
+        
+        <li><a href="${pageContext.request.contextPath}/guest/news.xhtml?face=fileView">交通课堂</a></li>
+        <li><a href="${pageContext.request.contextPath}/guest/news.xhtml?face=videoView">交通视频</a></li>
+        <!-- <li><a href="${pageContext.request.contextPath}/guest/news.xhtml?face=fileWeatherView&fileType=0">水位和气象</a></li> -->
+        <li><a href="${pageContext.request.contextPath}/guest/news.xhtml?face=infoSearch">交通搜索 </a></li>
+    </ul>
+</div>
+<!--Header End-->

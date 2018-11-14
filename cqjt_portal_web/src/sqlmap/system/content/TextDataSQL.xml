@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--文字类信息管理     20140708 gyf-->
+<sqlMap namespace="TextData">
+		<!--获取所有 -->
+		<select id="getTextDataAll" parameterClass="map" resultClass="textData">
+			select text_id as textId,title,text_content as textContent,author,position,
+				entry_dept as entryDept,to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate,
+				text_source as textSource,is_photo_show as isPhotoShow,photo_url as photoUrl,
+				approvaler,is_del as isDel,status
+			from text_data
+			where is_del=#isDel#
+			<dynamic>
+			   <isNotEmpty prepend="and" property="title">
+				 title like '%'||#title#||'%'	
+			   </isNotEmpty> 
+			   <isNotEmpty prepend="and" property="author">
+				 author like '%'||#author#||'%'	
+			   </isNotEmpty> 
+			   <isNotEmpty prepend="and" property="startDate">
+		      	 create_date >=#startDate#
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="endDate">
+			     create_date  
+			     <![CDATA[  <=#endDate#]]>
+			   </isNotEmpty>
+			</dynamic>
+			order by create_date desc
+		</select>
+
+		<!--根据Id查询-->
+		<select id="getTextDataById" parameterClass="String" resultClass="textData">
+			select text_id as textId,title,text_content as textContent,author,position,
+				entry_dept as entryDept,to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate,
+				text_source as textSource,is_photo_show as isPhotoShow,photo_url as photoUrl,
+				approvaler,is_del as isDel,status
+			from text_data
+			where is_del='0' and text_id=#textId#
+		</select> 
+		<!--更新 -->
+		<update id="updateTextData" parameterClass="textData">
+			update text_data 
+			set 
+			<dynamic>
+			   <isNotEmpty  property="isDel">
+				 	is_del=#isDel#
+			   </isNotEmpty> 
+			   <isEmpty  property="isDel">
+				   	title=#title#,
+				   	text_content=#textContent#,
+				   	author=#author#,
+				   	position=#position#,
+				    entry_dept=#entryDept#,
+				    text_source=#textSource#,
+				    is_photo_show=#isPhotoShow#,
+				    photo_url=#photoUrl#,
+					approvaler=#approvaler#,
+					status=#status#
+			   </isEmpty>
+			</dynamic>
+			where text_id=#textId#
+		</update>
+
+		<!--更新状态标志 -->
+		<update id="updateStatus" parameterClass="textData">
+			update text_data 
+			set status=#status#
+			where text_id=#textId#
+		</update>
+
+        <!--新增 -->
+        <insert id="addTextData" parameterClass="textData" >
+			insert into text_data (
+				text_id ,title,text_content ,author,position,
+				entry_dept,create_date,text_source,is_photo_show,
+				photo_url,approvaler,is_del,status
+			) values (
+				#textId#, #title#, #textContent#, #author#,#position#,
+				#entryDept#,to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'), #textSource#,#isPhotoShow#,
+				#photoUrl#, #approvaler#, #isDel#, #status#)
+		</insert>
+        
+
+</sqlMap>

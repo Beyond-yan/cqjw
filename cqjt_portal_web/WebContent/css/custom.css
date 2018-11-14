@@ -1,0 +1,4 @@
+@charset "utf-8";
+.page {margin:10px;text-align:right;line-height:22px;}/*许健 margin:10px; -> margin:4px;*/
+.page a{display:inline-block;*zoom:1;padding:0 10px;color:#0064ad;border:1px solid #ccdbe4;text-align:center;}
+.page a.cur,.pager a:hover{border-color:#3e95e2;font-weight:bold;color:#000;background-color:#f0f7fd;}

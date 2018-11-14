@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+	 PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+	 "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="TextNews">
+
+	<insert id="insertTextNews" parameterClass="textNews">
+   	insert into text_news(
+   	  news_id, news_title, sub_news_title, 
+	  news_content, news_tags, category, 
+	  entry_user, entry_date, approvaler, 
+	  is_photos_show, photo_url, is_del, 
+	  flag, create_date, create_by, 
+	  gov_use_flag, news_author, entry_dept, 
+	  news_source, is_public,dept_name,outer_news_id,outer_category,SUB_CATEGORY,SUB_CATEGORY_INFO
+	) values (
+	  #newsId#,#newsTitle#,#subNewsTitle#,
+	  #newsContent#,','||#newsTagsStr#||',',#category#,
+	  #entryUser#,#entryDate#,#approvaler#,
+	  #isPhotosShow#,#photoUrl#,#isDel#,
+	  #flag#,to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'),#createBy#, 
+	  #govUseFlag#, #newsAuthor#, #entryDept#, 
+	  #newsSource#, #isPublic#, #deptName#,#outerNewsId#,#outerCategory#,#SUB_CATEGORY#,#SUB_CATEGORY_INFO#
+	) 
+	</insert>
+   
+	<delete id="deleteTextNews" parameterClass="String">
+   	delete from text_news where news_id = #newsId#
+	</delete>
+   
+	<update id="updateTextNews" parameterClass="textNews">
+     update text_news 
+		<dynamic prepend="set">
+			<isNotNull prepend="," property="newsTitle">
+     		 	 news_title=#newsTitle#
+			</isNotNull>
+			<isNotNull prepend="," property="subNewsTitle">
+     		 	  sub_news_title=#subNewsTitle#
+			</isNotNull>
+			<isNotNull prepend="," property="newsContent">
+     		 	   news_content=#newsContent#
+			</isNotNull>
+			<isNotNull prepend="," property="newsTagsStr">
+				  news_tags=#newsTagsStr#
+			</isNotNull>
+			<isNotNull prepend="," property="category">
+				  category=#category#
+			</isNotNull>
+			<isNotNull prepend="," property="approvaler">
+				  approvaler=#approvaler#
+			</isNotNull>
+			<isNotNull prepend="," property="isPhotosShow">
+				 is_photos_show=#isPhotosShow#
+			</isNotNull>
+			<isNotNull prepend="," property="photoUrl">
+				 photo_url=#photoUrl#
+			</isNotNull>
+			<isNotNull prepend="," property="isDel">
+				 is_del=#isDel#
+			</isNotNull>
+			<isNotNull prepend="," property="flag">
+				  flag=#flag#
+			</isNotNull>
+			<isNotNull prepend="," property="govUseFlag">
+				    gov_use_flag=#govUseFlag#
+			</isNotNull>
+			<isNotNull prepend="," property="newsAuthor">
+				    news_author=#newsAuthor#
+			</isNotNull>
+			<isNotNull prepend="," property="newsSource">
+				     news_source=#newsSource#
+			</isNotNull>
+			<isNotNull prepend="," property="isPublic">
+				     is_public=#isPublic#
+			</isNotNull>
+			<isNotNull prepend="," property="entryDept">
+				     entry_dept=#entryDept#
+			</isNotNull>
+			<isNotNull prepend="," property="mergeId">
+				      merge_id=#mergeId#
+			</isNotNull>
+			<isNotNull prepend="," property="outerNewsId">
+				       outer_news_id=#outerNewsId#
+			</isNotNull>
+			<isNotNull prepend="," property="deptName">
+				       dept_name=#deptName#
+			</isNotNull>
+			<isNotNull prepend="," property="entryDate">
+				       entry_date=#entryDate#
+			</isNotNull>
+			<isNotNull prepend="," property="createDate">
+				      create_date=to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss')
+			</isNotNull>
+			<isNotNull prepend="," property="outerCategory">
+				      outer_category=#outerCategory#
+			</isNotNull>
+			<isNotNull prepend="," property="isCheckAgain">
+				      IS_CHECK_AGAIN=#isCheckAgain#
+			</isNotNull>
+			<isNotNull prepend="," property="compiler">
+				      COMPILER=#compiler#
+			</isNotNull>
+			<isNotNull prepend="," property="stickState">
+				      STICK_STATE=#stickState#
+			</isNotNull>
+			<isNotNull prepend="," property="SUB_CATEGORY">
+				      SUB_CATEGORY=#SUB_CATEGORY#
+			</isNotNull>
+			<isNotNull prepend="," property="SUB_CATEGORY_INFO">
+				      SUB_CATEGORY_INFO=#SUB_CATEGORY_INFO#
+			</isNotNull>
+			<isNotNull prepend="," property="sectionPosition">
+				      SECTION_POSTION=#sectionPosition#
+			</isNotNull>
+			<isEqual prepend=","  property="stickState" compareValue="0">
+					STICKSORT=#stickSort#
+			</isEqual>
+			<isEqual prepend=","  property="stickState" compareValue="1">
+					STICKSORT=#stickSort#
+			</isEqual>
+			
+			 where 	news_id = #newsId#
+		</dynamic>	
+	</update>
+	<!--提供编辑页面初始化 -->
+	<select id="getTextNewsDetail" parameterClass="java.lang.String" resultClass="textNews">
+   	  select news_id as newsId, news_title as newsTitle, sub_news_title as subNewsTitle, SECTION_POSTION as sectionPosition,
+		  news_content as newsContent, news_tags as newsTagsStr, category, 
+		  entry_user as entryUser,to_char(n.entry_date,'yyyy-MM-dd hh24:mi:ss')as entryDate, approvaler, 
+		  is_photos_show as isPhotosShow, photo_url as photoUrl, n.is_del as isDel, 
+		  flag, to_char(n.create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, n.create_by as createBy, 
+		  gov_use_flag as govUseFlag, news_author as newsAuthor, entry_dept as entryDept,dept_name as deptName, 
+		  news_source as newsSource, is_public as isPublic, c.CATEGORY_NAME as categoryName,
+		  n.merge_id as mergeId,n.outer_news_id as outerNewsId,IS_OLDDATA as isOldData,outer_Category as outerCategory,
+		  IS_CHECK_AGAIN as isCheckAgain,COMPILER as compiler,STICK_STATE as stickState
+   	  from   text_news n
+   	  left join TEXT_CATEGORY c on C.CATEGORY_ID=N.CATEGORY
+   	  where  n.news_id=#newsId#
+	</select>
+	
+		<!--通过置顶状态查询单个数据 -->
+	<select id="getTextNewsByStickState" parameterClass="java.lang.String" resultClass="textNews">
+   	  select news_id as newsId
+   	  from   text_news n
+   	  where  n.stick_state=#stickState#
+	</select>
+	
+	<!--通过newsId修改单个数据 -->
+   	<update id="updateTextNewsByNewsId" parameterClass="java.lang.String">
+     update text_news set STICK_STATE =0 where news_id = #newsId#
+     </update>
+   	<update id="updateNewsSort" parameterClass="Map">
+     update text_news set STICK_STATE =#newsSort# 
+     	where news_id = #newsId#
+    </update>
+   
+   
+	<!--查询 -->	
+	<select id="getTextNewsList"  parameterClass="Map"  resultClass="textNews">
+   	   select a.* from (
+	   select n.news_id as newsId, n.news_title as newsTitle, n.sub_news_title as subNewsTitle, 
+		  n.news_content as newsContent, n.news_tags as newsTagsStr, n.category as category, 
+		  n.entry_user as entryUser,to_char(n.entry_date,'yyyy-MM-dd hh24:mi:ss')as entryDate, n.approvaler, 
+		  n.is_photos_show as isPhotosShow, n.photo_url as photoUrl, n.is_del as isDel, 
+		  n.flag, to_char(n.create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, n.create_by as createBy, 
+		  n.gov_use_flag as govUseFlag, n.news_author as newsAuthor, n.entry_dept as entryDept,n.dept_name as deptName, 
+		  n.news_source as newsSource, n.is_public as isPublic, c.category_name as categoryName,
+		  n.merge_id as mergeId,n.outer_news_id as outerNewsId, f.adopt_type AS adoptType, n.stick_state newsSort
+	    from text_news n
+	    left join TEXT_CATEGORY c on C.CATEGORY_ID=N.CATEGORY 
+	    left join  SYS_DEPARTMENT s on to_char(S.DEPT_ID)=N.ENTRY_DEPT
+		LEFT JOIN TEXT_GOV_INFO f ON f.NEWS_ID = n.news_id
+	    where n.is_del=#isDel#
+		<dynamic>
+			<isNotEmpty prepend="and" property="category">
+		      n.category = #category#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="deptName">
+		      n.dept_name = #deptName#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="newsTitle">
+			 n.news_title like '%'||decode(#newsTitle#,'',n.news_title,#newsTitle#)||'%'	
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryUser">
+			 n.entry_user like '%'||decode(#entryUser#,'',n.entry_user,#entryUser#)||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateS">
+		      n.entry_date >=#entryDateS#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateE">
+			n.entry_date<![CDATA[ <=#entryDateE# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="newsTag">
+		   	n.news_tags like '%'||decode(#newsTag#,'',n.news_tags,#newsTag#)||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="govUseFlag">
+		      <iterate property="govUseFlag" open="(" close=")" conjunction="or">
+		      	n.gov_use_flag = #govUseFlag[]#
+		      </iterate>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isPhotosShow">
+		      n.is_photos_show = #isPhotosShow#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isCheckAgain">
+		      n.IS_CHECK_AGAIN = #isCheckAgain#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="flags">
+				<iterate property="flags" open="(" close=")" conjunction="or">
+				  n.flag=#flags[]#
+				</iterate>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="categorys">
+				<iterate property="categorys" open="(" close=")" conjunction="or">
+				  C.CATEGORY_NAME like #categorys[]#
+				</iterate> 
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="dept_categorys">
+				<iterate property="dept_categorys" open="(" close=")" conjunction="or">
+				  s.dept_category=#dept_categorys[]#
+				</iterate> 
+			</isNotEmpty>
+			
+		</dynamic> 
+		<dynamic>
+			order by n.stick_state desc, STICKSORT desc nulls last,n.entry_date desc
+			<!-- 
+			<isNotEmpty  property="stickState">
+				order by n.stick_state desc, STICKSORT desc nulls last,n.entry_date desc
+			</isNotEmpty>
+			<isEmpty  property="stickState">
+				 order by n.stick_state desc,n.entry_date desc nulls last
+			</isEmpty>
+			 -->
+		</dynamic>
+	  
+	   ) a where 1=1 
+		<dynamic>
+			<isNotEmpty prepend="and" property="startRow">
+		      rownum >= #startRow#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endRow">
+			<![CDATA[ rownum <= #endRow# ]]>
+			</isNotEmpty>
+		</dynamic> 
+	</select> 
+	
+	<!-- 导出excel 查询 -->
+	<select id="getTextNewsListForExport"  parameterClass="Map"  resultClass="textNews">
+   	   select a.* from (
+	   select n.news_id as newsId, n.news_title as newsTitle, n.sub_news_title as subNewsTitle, 
+		  n.news_content as newsContent, n.news_tags as newsTagsStr, n.category as category, 
+		  n.entry_user as entryUser,to_char(n.entry_date,'yyyy-MM-dd hh24:mi:ss')as entryDate, n.approvaler, 
+		  n.is_photos_show as isPhotosShow, n.photo_url as photoUrl, n.is_del as isDel, 
+		  n.flag, to_char(n.create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, n.create_by as createBy, 
+		  n.gov_use_flag as govUseFlag, n.news_author as newsAuthor, n.entry_dept as entryDept,n.dept_name as deptName, 
+		  n.news_source as newsSource, n.is_public as isPublic, c.category_name as categoryName,
+		  n.merge_id as mergeId,n.outer_news_id as outerNewsId, f.adopt_type AS adoptType, n.stick_state newsSort
+	    from text_news n
+	    left join TEXT_CATEGORY c on C.CATEGORY_ID=N.CATEGORY 
+	    left join  SYS_DEPARTMENT s on to_char(S.DEPT_ID)=N.ENTRY_DEPT
+		LEFT JOIN TEXT_GOV_INFO f ON f.NEWS_ID = n.news_id
+	    where n.is_del=#isDel#
+		<dynamic>
+			<isNotEmpty prepend="and" property="category">
+		      n.category = #category#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="deptName">
+		      n.dept_name = #deptName#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="newsTitle">
+			 n.news_title like '%'||decode(#newsTitle#,'',n.news_title,#newsTitle#)||'%'	
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryUser">
+			 n.entry_user like '%'||decode(#entryUser#,'',n.entry_user,#entryUser#)||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateS">
+		      n.entry_date >=#entryDateS#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateE">
+			n.entry_date<![CDATA[ <=#entryDateE# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="newsTag">
+		   	n.news_tags like '%'||decode(#newsTag#,'',n.news_tags,#newsTag#)||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="govUseFlag">
+		      <iterate property="govUseFlag" open="(" close=")" conjunction="or">
+		      	n.gov_use_flag = #govUseFlag[]#
+		      </iterate>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isPhotosShow">
+		      n.is_photos_show = #isPhotosShow#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isCheckAgain">
+		      n.IS_CHECK_AGAIN = #isCheckAgain#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="flags">
+				<iterate property="flags" open="(" close=")" conjunction="or">
+				  n.flag=#flags[]#
+				</iterate>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="categorys">
+				<iterate property="categorys" open="(" close=")" conjunction="or">
+				  C.CATEGORY_NAME like #categorys[]#
+				</iterate> 
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="dept_categorys">
+				<iterate property="dept_categorys" open="(" close=")" conjunction="or">
+				  s.dept_category=#dept_categorys[]#
+				</iterate> 
+			</isNotEmpty>
+		</dynamic> 
+			order by n.stick_state desc, STICKSORT desc nulls last,n.entry_date desc
+	   ) a where 1=1 
+	</select>
+	
+	<!-- wcf20140725   政务信息回收站查询 -->
+	<select id="getGovRecycleList"  parameterClass="Map"  resultClass="textNews">
+   select 
+      	 newsId,newsTitle,entryUser,isDel,
+      	 to_char(createDate1,'yyyy-MM-dd hh24:mi:ss') as createDate
+         from 
+     	 (select pub_id as newsId ,pub_name as newsTitle,
+            create_user as entryUser,
+            create_date  as createDate1 ,
+            is_del as isDel
+            from text_publication 
+            where is_del='1'
+    union all
+        select gi_id as newsId, gi_title as newsTitle,
+          	 entry_user as entryUser,
+         	 create_date as createDate1,
+         	 is_del as isDel
+	    from text_gov_info where is_del='1'
+    union all
+        select news_id as newsId, news_title as newsTitle,
+		 	 entry_user as entryUser,
+             create_date as createDate1,
+             is_del as isDel
+	    from text_news 
+	    where is_del='1' and news_tags like '%GovNews%' and gov_use_flag='0'
+	    )
+	    where 1=1 
+		<dynamic>
+			<isNotEmpty prepend="and" property="newsTitle">
+			 newsTitle like '%'||decode(#newsTitle#,'',newsTitle,#newsTitle#)||'%'	
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryUser">
+			 entryUser like '%'||decode(#entryUser#,'',entryUser,#entryUser#)||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateS">
+		      createDate1 >=#entryDateS#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateE">
+			createDate1<![CDATA[ <=#entryDateE# ]]>
+			</isNotEmpty>
+		</dynamic> 
+   		order by createDate1 desc
+	</select> 
+	<!--首页交通信息筛选查询 -->	
+	<select id="getTNewsList"  parameterClass="Map"  resultClass="textNews">
+   	   select a.* from (
+	   select n.news_id as newsId, n.news_title as newsTitle, n.sub_news_title as subNewsTitle, 
+		  n.news_content as newsContent, n.news_tags as newsTagsStr, n.category as category, 
+		  n.entry_user as entryUser,to_char(n.entry_date,'yyyy-MM-dd hh24:mi:ss')as entryDate, n.approvaler, 
+		  n.is_photos_show as isPhotosShow, n.photo_url as photoUrl, n.is_del as isDel, 
+		  n.flag, to_char(n.create_date,'yyyy-MM-dd hh24:mi:ss') as createDate, n.create_by as createBy, 
+		  n.gov_use_flag as govUseFlag, n.news_author as newsAuthor, n.entry_dept as entryDept,n.dept_name as deptName, 
+		  n.news_source as newsSource, n.is_public as isPublic, c.category_name as categoryName,n.outer_news_id as outerNewsId
+	    from text_news n
+	    left join TEXT_CATEGORY c on C.CATEGORY_ID=N.CATEGORY
+	    where n.is_del=#isDel#
+		<dynamic>
+			<isNotEmpty prepend="and" property="newsTitle">
+			 n.news_title like '%'||decode(#newsTitle#,'',n.news_title,#newsTitle#)||'%'	
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryUser">
+			 n.entry_user like '%'||decode(#entryUser#,'',n.entry_user,#entryUser#)||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateS">
+		      n.entry_date >=#entryDateS#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateE">
+			n.entry_date<![CDATA[ <=#entryDateE# ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="newsTag">
+		   	n.news_tags like '%'||decode(#newsTag#,'',n.news_tags,#newsTag#)||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="govUseFlag">
+		      n.gov_use_flag = #govUseFlag#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="isPhotosShow">
+		      n.is_photos_show = #isPhotosShow#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="flags">
+				<iterate property="flags" open="(" close=")" conjunction="or">
+				  n.flag=#flags[]#
+				</iterate> 
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="categorys">
+				<iterate property="categorys" open="(" close=")" conjunction="or">
+				  C.CATEGORY_NAME=#categorys[]#
+				</iterate> 
+			</isNotEmpty>
+		</dynamic>
+	   order by n.entry_date desc nulls last
+	   ) a where 1=1 and A.categoryName not in ('招标公告','通知公告','中标结果','资质审查公示')
+		<dynamic>
+			<isNotEmpty prepend="and" property="startRow">
+		      rownum >= #startRow#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endRow">
+			<![CDATA[ rownum <= #endRow# ]]>
+			</isNotEmpty>
+		</dynamic> 
+	</select> 
+	
+	<update id="updateTextNewsContetn" parameterClass="textNews" >
+		update text_news set NEWS_CONTENT=#newsContent# where news_id=#newsId#
+	</update>
+	
+	<select id="getMainOrSubMainTextNews" parameterClass="Map" resultClass="textNews" >
+		SELECT
+			*
+		FROM
+			(
+				SELECT
+					TO_CHAR (
+						v.update_date,
+						'yyyy-MM-dd hh24:mi:ss'
+					) AS updateDate,
+					v.update_user AS updateUser,
+			n.news_id AS newsId,
+			n.news_title AS newsTitle,
+			n.sub_news_title AS subNewsTitle,
+			n.news_content AS newsContent,
+			n.news_tags AS newsTagsStr,
+			n. CATEGORY AS CATEGORY,
+			n.entry_user AS entryUser,
+			TO_CHAR (
+				n.entry_date,
+				'yyyy-MM-dd hh24:mi:ss'
+			) AS entryDate,
+			n.approvaler,
+			n.is_photos_show AS isPhotosShow,
+			n.photo_url AS photoUrl,
+			n.is_del AS isDel,
+			n.flag,
+			TO_CHAR (
+				n.create_date,
+				'yyyy-MM-dd hh24:mi:ss'
+			) AS createDate,
+			n.create_by AS createBy,
+			n.gov_use_flag AS govUseFlag,
+			n.news_author AS newsAuthor,
+			n.entry_dept AS entryDept,
+			n.dept_name AS deptName,
+			n.news_source AS newsSource,
+			n.is_public AS isPublic, 
+			n.outer_news_id AS outerNewsId
+				FROM
+					text_news n
+				LEFT JOIN video_record v ON n.NEWS_ID = v.VIDEO_ID
+				WHERE
+				n.is_del=#isDel# and n.SECTION_POSTION=#sectionPosition# 
+				ORDER BY v.update_date DESC NULLS LAST
+			)where rownum = 1
+	</select>
+	
+</sqlMap>

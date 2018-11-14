@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMapConfig
+	PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+	<settings statementCachingEnabled="true" cacheModelsEnabled="false"
+		useStatementNamespaces="true" classInfoCacheEnabled="true" />
+	<!-- 2014.06.23  xujian  -->
+	<typeAlias alias="program" type="com.gdssoft.cqjt.pojo.cms.Program" />
+	<sqlMap resource="sqlmap/system/cms/ProgramSQL.xml" />
+	<sqlMap resource="sqlmap/system/cms/NewsSQL.xml" />
+	<sqlMap resource="sqlmap/system/cms/VideoNewsSQL.xml" />
+	
+</sqlMapConfig>
+	

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--考核历史信息     20150115 gyf-->
+<sqlMap namespace="CheckHistory">
+		<!--获取所有资料 -->
+		<select id="getFileAll" parameterClass="map" resultClass="checkHistory">
+			select CHECK_ID as checkId,CHECK_NAME as checkName,CHECK_DESC as checkDesc,
+				FILE_PATH as filePath, IS_DEL as isDel, 
+				to_char(CREATE_DATE ,'yyyy-MM-dd hh24:mi:ss') as createDate,
+				CREATE_BY as createBy,CHECK_TYPE as checkType,CHECK_GROUP as checkGroup,ATTACHMENT as attachment
+			from TEXT_CHECK_HISTORY
+			where IS_DEL=#isDel#
+			<dynamic>
+			   <isNotEmpty prepend="and" property="checkName">
+				 CHECK_NAME like '%'||#checkName#||'%'	
+			   </isNotEmpty> 
+			   <isNotEmpty prepend="and" property="startDate">
+		      	 CREATE_DATE >=#startDate#
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="endDate">
+			     CREATE_DATE  
+			     <![CDATA[  <=#endDate#]]>
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="checkGroup">
+				 CHECK_GROUP like '%'||#checkGroup#||'%'	
+			   </isNotEmpty> 
+			</dynamic>
+			order by CREATE_DATE desc
+		</select>
+
+		<!--根据fileId查询资料-->
+		<select id="getFileByFileId" parameterClass="String" resultClass="checkHistory">
+			select CHECK_ID as checkId,CHECK_NAME as checkName,CHECK_DESC as checkDesc,
+				FILE_PATH as filePath, IS_DEL as isDel, 
+				to_char(CREATE_DATE ,'yyyy-MM-dd hh24:mi:ss') as createDate,
+				CREATE_BY as createBy,CHECK_TYPE as checkType,CHECK_GROUP as checkGroup,ATTACHMENT as attachment
+			from TEXT_CHECK_HISTORY
+			where IS_DEL='0' and CHECK_ID=#checkId#
+		</select> 
+		<!--更新 -->
+		<update id="updateFile" parameterClass="checkHistory">
+			update TEXT_CHECK_HISTORY 
+			set 
+			<dynamic>
+			   <isNotEmpty  property="isDel">
+				 	IS_DEL=#isDel#
+			   </isNotEmpty> 
+			   <isEmpty  property="isDel">
+				   	CHECK_NAME=#checkName#,
+					CHECK_DESC=#checkDesc#,
+					FILE_PATH=#filePath#,
+					CHECK_TYPE = #checkType#,
+					ATTACHMENT = #attachment#,	
+					CHECK_GROUP = #checkGroup#
+			   </isEmpty>
+			</dynamic>
+			where CHECK_ID=#checkId#
+		</update>
+        <!--增加上传资料 -->
+        <insert id="addFile" parameterClass="checkHistory" >
+			insert into TEXT_CHECK_HISTORY (
+				CHECK_ID, CHECK_NAME, CHECK_DESC, FILE_PATH, IS_DEL, 
+				CREATE_DATE, CREATE_BY,CHECK_TYPE,ATTACHMENT,CHECK_GROUP
+			) values (
+				#checkId#, #checkName#, #checkDesc#, #filePath#, '0', 
+				to_date(#createDate#,'yyyy/MM/dd hh24:mi:ss'), #createBy#,#checkType#,#attachment#,#checkGroup#)
+		</insert>
+</sqlMap>

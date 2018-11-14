@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+	 PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+	 "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="CheckStandard">
+	<!--插入 -->
+	<insert id="insertStandard"  parameterClass="checkStandard" >
+	  	insert into text_check_standard(
+	   	  check_id, item_name, code,score,
+		  create_user,create_date, is_del,reward
+		) values (
+		  #checkId#,#itemName#,#code#,
+		  #score#,#createUser#,
+		  to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'),
+		  #isDel#,#reward#
+		) 
+	</insert>
+	<!--查询 -->	
+	<select id="getStandardInfo"  parameterClass="Map"  resultClass="checkStandard">
+	   select check_id as checkId,item_name as itemName,
+		  score as score ,code as code, create_user as createUser,
+		  to_char(create_date,'yyyy-MM-dd hh24:mi:ss') as createDate,
+		  is_del as isDel ,reward as reward
+	    from text_check_standard where is_del='0'
+		<dynamic>
+			<isNotEmpty prepend="and" property="checkCode">
+			 code like '%'||decode(#checkCode#,'',code,#checkCode#)||'%'	
+			</isNotEmpty>
+		</dynamic> 
+		 order by create_date desc nulls last
+	</select> 
+		
+	<update id="deleteStandardById" parameterClass="java.lang.String">
+	   	update text_check_standard
+	   	set is_del='1'
+	    where check_id = #checkId#
+	</update>
+   
+   	<update id="updateStandard" parameterClass="checkStandard">
+	    update text_check_standard
+	   	set item_name=#itemName#, code=#code#,score=#score#,
+		create_user=#createUser#,
+		is_del='0' ,reward=#reward#
+	    where check_id = #checkId#
+	</update>
+	<!--查询所有的考核编码 -->	
+	<select id="getSInfo"  parameterClass="String" resultClass="checkStandard">
+	    select 
+	    code,
+	    ITEM_NAME AS itemName
+	    from text_check_standard 
+	    where  code = #code#
+	</select> 
+	
+	<!--查询 -->	
+	<select id="queryCheckStandard"  parameterClass="Map"  resultClass="checkStandard">
+	   select check_id as checkId,item_name as itemName,
+		  score as score ,code as code, create_user as createUser,
+		  to_char(create_date,'yyyy-MM-dd hh24:mi:ss') as createDate,
+		  is_del as isDel ,reward as reward
+	   from text_check_standard where is_del='0' 
+	    <isNotEmpty prepend="and" property="codes">
+	    <iterate property="codes" open="(" conjunction="or" close=")"> 
+	    code = #codes[]#
+		</iterate> 
+		</isNotEmpty>
+		 order by create_date desc nulls last
+	</select> 
+</sqlMap>

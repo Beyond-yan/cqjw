@@ -1,0 +1,138 @@
+body,div,form,img,li,h3,h2,h1,p,span {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	font-family: Arial;
+	font-size: 9pt;
+}/* 
+
+body {
+	background-color: #F7F8F9;
+	color: #395A7B;
+}
+
+fieldset {
+	margin-top: 10px;
+}
+
+a {
+	border: 1px;
+	text-decoration: none;
+	CURSOR: hand;
+}
+
+a:hover {
+	color: #004d84
+}
+
+select {
+	width: 100px;
+}
+
+************撠璅��*************
+.navigation {
+	clear: both;
+	height: 25px;
+	background: url(../images/navigation.gif) repeat #fffff;
+	border-top:3px solid #52b3ea;
+	border-bottom: 4px solid #52b3ea;
+}
+
+.navigation span {
+	float: left;
+	line-height: 24px;
+	text-indent: 5px;
+	font-weight: bold;
+}
+
+.navigation a {
+	float: right;
+	line-height: 18px;
+	border: 1px solid #1f6c8e;
+	padding-left: 4px;
+	padding-right: 4px;
+	margin: 2px;
+	background: url(/images/btn_bg.jpg) left top;
+	height: 20px;
+}
+
+***********************************************
+************Condition***************
+.Condition {
+	vertical-align: middle;
+	margin: 5px 5px 5px 5px;
+	border: 0;
+	text-align: left;
+}
+
+.Condition td {
+	border-width: 0px;
+}
+
+.textReadonly {
+	background-color: #EFEFEF; D4D0C8,E6E3E0,F5F5F5,EFEFEF
+}
+
+***********************************************
+*****************table******************************
+table {
+	margin-top: 10px;
+	width: 100%;
+	border-collapse: collapse;
+	line-height: 22px;
+	background-color: #F3F7FA;
+}
+
+table th {
+	border: 1px solid #C4E7FB;
+	font-weight: bold;
+	font-size: 9pt;
+	background: url(../images/index1_72.gif) repeat-x #ddeef8;
+	border: 1px solid #E7E8E0color:  white;
+	height: 25px;
+	line-height: 25px;
+	text-align: center
+}
+
+td {
+	border: 1px solid #C4E7FB 52b3ea;
+	background-color: white;
+	color: rgb(100, 100, 100);
+	text-align: center;
+}
+
+td.alignLeft {
+	border: 1px solid #C4E7FB 52b3ea;
+	background-color: white;
+	color: rgb(100, 100, 100);
+	text-align: left;
+}
+
+td.alignRight {
+	border: 1px solid #C4E7FB 52b3ea;
+	background-color: white;
+	color: rgb(100, 100, 100);
+	text-align: right;
+}
+
+input.button {
+	font-family: Arial;
+	font-size: 9pt;
+	text-align: center;
+	background-color:#FFCC66;
+border-width:2px;
+border-top-color:rgb(242,240,240);
+border-right-color:rgb(153,153,153);
+border-bottom-color:rgb(153,153,153);
+border-left-color:rgb(242,240,240);
+border-style:solid;
+	color: #0a70ae;
+}
+
+tr.over td {
+	background: #bcd4ec;
+}
+
+td.over {
+	background: #bcd4ec;
+} */

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+ PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+ "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="role">
+
+  <select id="getRoleList" parameterClass="role" resultClass="role">
+    select ROLE_ID roleId,ROLE_NAME roleName,DESCRIPTION description
+  	from SYS_ROLE
+    where IS_DEL='0'
+     <dynamic>
+     	<isNotEmpty prepend="and" property="roleName">
+     		ROLE_NAME like '%'||decode(#roleName#,'',ROLE_NAME,#roleName#)||'%'	
+     	</isNotEmpty>
+     </dynamic>
+     order by ROLE_ID desc
+  </select> 
+  
+   <insert id="insertRole" parameterClass="role">
+   	  insert into SYS_ROLE(ROLE_ID,ROLE_NAME,DESCRIPTION,CREATE_USERNO,
+   	  CREATE_DATE,UPDATE_DATE,UPDATE_ID,IS_DEL)
+   	  values(sys_guid(),#roleName#,#description#,#createUserno#,sysdate,sysdate,#updateId#,'0')
+   </insert>
+     
+   <update id="updateRole" parameterClass="role">
+   	 update SYS_ROLE
+   	 set ROLE_NAME=#roleName#,DESCRIPTION=#description#,UPDATE_DATE=sysdate,UPDATE_ID=#updateId#
+   	 where ROLE_ID=#roleId#
+   </update>
+     
+   <!--  2014/06/04H2902992 -->
+   <update id="updateEditRole" parameterClass="role">
+   	 update SYS_ROLE
+   	 set 
+   	 SYS_ROLE.ROLE_NAME=#roleName#,
+   	 
+   	 
+   	 where ROLE_ID=#roleId#
+   </update> 
+      
+    <update id="deleteRole" parameterClass="role">
+   	 update SYS_ROLE
+   	 set is_del='1',UPDATE_DATE=sysdate,UPDATE_ID=#updateId#
+   	 where ROLE_ID=#roleId#
+   </update>
+       
+   <select id="getRoleDetail" parameterClass="role" resultClass="role">
+   	 select ROLE_ID roleId,ROLE_NAME roleName,DESCRIPTION description
+   	 from SYS_ROLE
+     where is_del='0'
+     and  ROLE_ID=#roleId#
+   </select>
+   
+   <select id="getRolePermissionList" parameterClass="rolePermission" resultClass="rolePermission">
+   	select distinct a.MENU_ID resourceID,a.MENU_NAME resourceName,a.parent_id parentID,
+    decode(b.MENU_ID,'','false','true') isCheck,decode(a.MENU_TYPE,'1','true','false') isOpen
+    from SYS_MENU a
+    left join SYS_ROLE_MENU b
+    on a.MENU_ID = b.MENU_ID
+    and b.ROLE_ID= #roleID#
+    order by a.menu_ID asc
+   </select>
+   	
+   <delete id="deleteRolePermission" parameterClass="rolePermission">
+   	 delete from SYS_ROLE_MENU where ROLE_ID=#roleID#
+   </delete>
+   
+   <insert id="insertRolePermission" parameterClass="rolePermission">
+   	 insert into SYS_ROLE_MENU(
+   	   ROLE_MENU_ID, ROLE_ID,MENU_ID,
+       CREATE_DATE,CREATE_USERID,UPDATE_DATE,
+       UPDATE_USERID,AUTHORITY)
+   	 values(
+   	 sys_guid(),#roleID#,#resourceID#,sysdate,#createUser#,sysdate,#modifyUser#,'1' 	 
+   	 )
+   </insert>
+   	
+</sqlMap>

@@ -1,0 +1,9 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!-- <div class="search">
+    <a href="javascript:;"  onclick="searchInfo();" title="搜索" class="btn"></a>
+    <div class="search-input">
+    	<input type="text" name="keyStr">
+    </div>
+  <span>网站搜索</span>
+</div> -->

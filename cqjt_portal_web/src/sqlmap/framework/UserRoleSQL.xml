@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+ PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+ "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="UserRole">
+	<insert id="insertUserRole" parameterClass="UserRole">
+		INSERT INTO
+		SYS_USER_ROLE (USER_ROLE_ID,
+		USER_ID,
+		ROLE_ID,
+		CREATE_DATE,
+		CREATE_USERNO,
+		UPDATE_DATE,
+		UPDATE_USERNO)
+		VALUES (SYS_GUID (),
+		#userId#,
+		#roleId#,
+		to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'),
+		#createUserNo#,
+		to_date(#updateDate#,'yyyy-MM-dd hh24:mi:ss'),
+		#updateUserNo#)
+	</insert>
+	<update id="updateUserRole" parameterClass="UserRole">
+		UPDATE
+		SYS_USER_ROLE
+		SET
+		ROLE_ID = #roleId#,
+		UPDATE_DATE = SYSDATE,
+		UPDATE_USERID = #updateUserNo#
+		where USER_ID=#userId#
+	</update>
+<!-- 	H2902992 20140604 -->
+	<update id="updateUserRoleInfo" parameterClass="UserRole">
+		UPDATE
+		SYS_USER_ROLE
+		SET
+		ROLE_ID = #roleId#,
+		UPDATE_DATE =to_date(#updateDate#,'yyyy-MM-dd hh24:mi:ss'),
+		UPDATE_USERNO = #updateUserNo#
+		where USER_ID=#userId#
+	</update>
+</sqlMap>

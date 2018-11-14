@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="CMSNews">
+	
+	<insert id="insertVidoeNewsToOuter" parameterClass="Map">
+		<selectKey resultClass="String" keyProperty="id" >
+			SELECT SYS_GUID() AS ID FROM DUAL
+		</selectKey>
+	   	INSERT INTO TRAFFIC_VIDEO_NEWS_T (
+		   VIDEO_NEWS_ID, VIDEO_NEWS_NAME,  
+		   VIDEO_NEWS_STATUS, ENTRY_USER, ENTRY_DATE, 
+		   IS_DEL, VIDEO_NEWS_SOURCE,MAIN_PHOTOS_NAME, MAIN_PHOTOS_URL, 
+		   VIDEO_NAME, VIDEO_URL                   
+		) values (
+		  #id#, #videoNews.videoTitle#, 
+		  7, #videoNews.entryUser#, to_date(#videoNews.createDate#,'yyyy-MM-dd hh24:mi:ss'), 
+		  '0', 30, #videoNews.imageName#, #videoNews.photoUrl#, 
+		  #videoNews.fileName#, #videoNews.videoUrl#
+		) 
+   </insert>
+</sqlMap>

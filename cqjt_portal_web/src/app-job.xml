@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+<!--Job   -->
+<bean id="updateSearchEngineIndexJob" class="com.gdssoft.core.tools.UpdateSearchEngineIndexJob"/>
+<bean id="updatePublicArchivesIndexJob" class="com.gdssoft.core.tools.UpdatePublicArchivesIndexJob"/>
+<bean id="updateInnerTrafficIndexJob" class="com.gdssoft.core.tools.UpdateInnerTrafficIndexJob"/>
+ 
+<!-- JobFactory       -->
+
+<bean id="innerSiteNewsJobFactory"
+   class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean" >
+   <property name="targetObject" ref="updateSearchEngineIndexJob" />
+   <property name="targetMethod" value ="updateIndexOfInnerSiteNews" />
+   <property name="concurrent" value="false" />
+</bean>
+
+<bean id="publicArchivesJobFactory"
+   class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean" >
+   <property name="targetObject" ref="updatePublicArchivesIndexJob" />
+   <property name="targetMethod" value ="updateArchivesIndexJob" />
+   <property name="concurrent" value="false" />
+</bean>
+
+<bean id="innerTrafficJobFactory"
+   class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean" >
+   <property name="targetObject" ref="updateInnerTrafficIndexJob" />
+   <property name="targetMethod" value ="updateTrafficIndexJob" />
+   <property name="concurrent" value="false" />
+</bean>
+<!--Trigger Start -->
+
+<bean id="innerSiteNewsTrigger"
+   class="org.springframework.scheduling.quartz.CronTriggerBean">
+   <property name="cronExpression">
+   <!--每天凌晨值执行一次-->
+   <value>0 0 0 * * ?</value>   
+   <!--每天中午12点,晚上11点执行-->
+   <!--<value>0 0 12,23 * * ?</value> --> 
+   </property>
+   <property name="jobDetail" ref="innerSiteNewsJobFactory" />
+</bean>
+
+<bean id="publicArchivesTrigger"
+   class="org.springframework.scheduling.quartz.CronTriggerBean">
+   <property name="cronExpression">
+   <!--每天凌晨值执行一次-->
+   <value>0 0 0 * * ?</value>   
+   <!--每天中午12点,晚上11点执行-->
+   <!--<value>0 0 12,23 * * ?</value> --> 
+   </property>
+   <property name="jobDetail" ref="publicArchivesJobFactory" />
+</bean>
+
+<bean id="innerTrafficTrigger"
+   class="org.springframework.scheduling.quartz.CronTriggerBean">
+   <property name="cronExpression">
+   <!--每天凌晨值执行一次-->
+   <value>0 0 0 * * ?</value>   
+   <!--每天中午12点,晚上11点执行-->
+   <!--<value>0 0 12,23 * * ?</value> --> 
+   </property>
+   <property name="jobDetail" ref="innerTrafficJobFactory" />
+</bean>
+<!--Trigger End -->
+
+<bean id="quartzScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+   <property name="triggers">
+    <list>
+        <ref bean="innerSiteNewsTrigger" />
+        <ref bean="publicArchivesTrigger" />
+        <ref bean="innerTrafficTrigger" />
+    </list>
+   </property>
+</bean>
+
+</beans>

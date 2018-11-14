@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+	 PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+	 "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="ReportForm">
+	<!--查询政务考核统计报表信息 zhpeng 20140630 -->	
+	<select id="getGovCheckReportByDept"  parameterClass="Map"  resultClass="govCheckReport">
+	  select sum(score) as score,gi_title as title ,sequenceNum,
+	  adopt_type as adoptType ,dept_name as deptName ,gi_id,
+	  dept_category as deptCategory
+	  from (
+			select  dept_name , dept_category ,d.sequence_num as sequenceNum  , news_id , gi_id ,gi_title , adopt_type ,entry_date,code,score
+			from sys_department d join text_gov_info g on g.entry_dept like d.dept_name||'%'    
+			join text_check_standard c  on g.adopt_type like '%'||c.code||'%' 
+			where g.is_del='0' 
+			<dynamic>
+                  <isNotEmpty prepend="and" property="deptName">
+                    dept_name like '%'||decode(#deptName#,'',dept_name,#deptName#)||'%'
+                  </isNotEmpty>
+                  <isNotEmpty prepend="and" property="status">
+                    d.dept_category like '%'||decode(#status#,'',d.dept_category,#status#)||'%'
+                  </isNotEmpty>
+                  <isNotEmpty>
+                                 <isNotEmpty prepend="and" property="startDate">
+                                   g.entry_date >= #startDate# 
+                                   </isNotEmpty>
+                                   <isNotEmpty prepend="and" property="endDate">
+                                   g.entry_date<![CDATA[ <=#endDate#]]>
+                               </isNotEmpty>
+                               
+                      </isNotEmpty>
+			</dynamic>
+		) 
+		group by gi_id,gi_title,adopt_type,dept_name ,dept_category ,sequenceNum 
+		order by sequenceNum asc
+	</select> 
+	<select id="getGovCheckReportByDate"  parameterClass="Map"  resultClass="govCheckReport">
+	  select cc.dept_name as deptName,cc.dept_category as deptCategory,cc.SEQUENCE_NUM as sequenceNum,cc.dept_id as deptId,bb.score,bb.adoptNum from(
+	  select sum(score) as score ,dept_name as deptName,sequenceNum,dept_id as deptId,dept_category as deptCategory,count(dept_name) as adoptNum 
+	  from(
+          select sum(score) as score,gi_title ,adopt_type ,dept_name , dept_category ,dept_id,gi_id,sequenceNum
+          from(
+              select  dept_name , dept_category , news_id , gi_id ,
+               gi_title , adopt_type ,entry_date,code,score,d.dept_id,d.sequence_num as sequenceNum
+               from sys_department d join text_gov_info g on g.entry_dept like d.dept_name||'%'   
+               join text_check_standard c  on g.adopt_type like '%'||c.code||'%' 
+               where g.is_del='0'
+               <dynamic>
+                  <isNotEmpty prepend="and" property="status">
+                    d.dept_category like '%'||decode(#status#,'',d.dept_category,#status#)||'%'
+                  </isNotEmpty>
+                  <isNotEmpty>
+                                 <isNotEmpty prepend="and" property="startDate">
+                                   entry_date >= #startDate# 
+                                   </isNotEmpty>
+                                   <isNotEmpty prepend="and" property="endDate">
+                                   entry_date<![CDATA[ <=#endDate#]]>
+                               </isNotEmpty>     
+                  </isNotEmpty>
+			   </dynamic>
+      		) group by   gi_id,gi_title,adopt_type,dept_name ,dept_category ,dept_id ,sequenceNum
+     		  order by dept_category,dept_name  ,dept_id
+      )group by dept_name ,dept_category ,dept_id ,sequenceNum) bb
+      RIGHT JOIN
+               (SELECT dept_name, dept_category,SEQUENCE_NUM,dept_id
+                  FROM sys_department s
+                 WHERE s.is_del = '0'
+                 <dynamic>
+                    <isNotEmpty prepend="and" property="status">
+                         s.dept_category like '%'||decode(#status#,'',s.dept_category,#status#)||'%'
+                     </isNotEmpty>
+                 </dynamic>
+                 ) cc ON bb.deptName = cc.dept_name
+       order by sequenceNum asc
+
+	</select> 
+		
+	<!--查询政务信息统计报表信息-->	
+	
+	<!--查询网站信息考核统计报表信息-->	
+	<select id="getSiteCheckReport" parameterClass="Map"  resultClass="siteCheckReport">
+	 SELECT cc.dept_category as deptCategory,cc.sequence_num as sequenceNum,cc.dept_name as deptName,cc.dept_id AS deptId, (
+            case when outScore is not null then(inScore+outScore)  else inScore end)as scoreSum, adoptNum FROM (  
+                select deptCategory, sequenceNum,aa.deptName, dept_id,inScore,adoptNum,outScore from(
+             select deptName,deptCategory,sequenceNum,dept_id,sum(inScore) as inScore,sum(adoptNum) as adoptNum  from(
+             SELECT dept_category AS deptCategory,sequenceNum,dept_name AS deptName,
+                   dept_id,SUM (score) AS inScore, COUNT (dept_name) AS adoptNum
+              FROM (SELECT SCORE,dept_category,c.dept_name, C.sequence_num AS sequenceNum,
+                           code,D.VIDEO_TITLE,c.DEPT_ID
+                      FROM TEXT_CHECK_STANDARD a
+                           RIGHT JOIN VIDEO_NEWS D
+                              ON d.TYPE LIKE '%' || a.code || '%'
+                           JOIN sys_department C ON c.dept_id = d.ENTRY_DEPT_ID
+                             WHERE d.is_del = '0' AND d.flag != '0' AND d.flag != '7' 
+                        <isNotEmpty prepend="and" property="createDateS">
+							       d.CREATE_DATE >=#createDateS#
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="createDateE">
+						d.CREATE_DATE<![CDATA[ <=#createDateE# ]]>
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="deptCategory">
+							<iterate property="deptCategory" open="(" close=")" conjunction="or">
+									 c.DEPT_CATEGORY=#deptCategory[]#
+							</iterate> 
+						</isNotEmpty>    
+						<isNotEmpty prepend="and" property="status">
+		                    c.dept_category like '%'||decode(#status#,'',c.dept_category,#status#)||'%'
+		                  </isNotEmpty> 
+                      )
+          GROUP BY dept_category,dept_name,dept_id,sequenceNum
+          UNION ALL
+            SELECT dept_category AS deptCategory, sequenceNum,  dept_name AS deptName, dept_id AS deptID, SUM (score) AS inScore,
+                            COUNT (dept_id) AS adoptNum
+                      FROM (SELECT dept_category,   code,  b.news_id,  c.dept_name, score, b.news_title,  c.dept_id,
+                                   c.sequence_num AS sequenceNum
+                              FROM TEXT_CHECK_STANDARD A JOIN text_news B      ON b.news_tags LIKE '%SiteNews%' JOIN sys_department C
+                                      ON c.dept_id = b.entry_dept                                     JOIN text_category m ON B.CATEGORY = M.CATEGORY_ID
+                             WHERE     b.is_del = '0' AND b.flag != '0' AND b.flag != '7' AND a.code LIKE '%sendSite%' 
+                                   <isNotEmpty prepend="and" property="createDateS">
+								       b.CREATE_DATE >=#createDateS#
+									</isNotEmpty>
+									<isNotEmpty prepend="and" property="createDateE">
+									b.CREATE_DATE<![CDATA[ <=#createDateE# ]]>
+									</isNotEmpty>
+									<isNotEmpty prepend="and" property="deptCategory">
+										<iterate property="deptCategory" open="(" close=")" conjunction="or">
+										 c.DEPT_CATEGORY=#deptCategory[]#
+										</iterate> 
+									</isNotEmpty>    
+									<isNotEmpty prepend="and" property="status">
+					                    c.dept_category like '%'||decode(#status#,'',c.dept_category,#status#)||'%'
+					                  </isNotEmpty> 
+                                    )
+                  GROUP BY dept_category,dept_name,  dept_id, sequenceNum)
+                             group by deptName,deptCategory,sequenceNum,dept_id
+                           ) aa                                                           
+                left JOIN
+                 (  SELECT deptname,(select SCORE from TEXT_CHECK_STANDARD where code like '%isPublic%')*count(NEWS_ID) as outScore                        
+                      FROM (SELECT  B.NEWS_ID,b.IS_PUBLIC ,c.dept_name as deptname from
+                                   text_news b     JOIN sys_department C 
+                                      ON c.dept_id = b.entry_dept    JOIN text_category m ON B.CATEGORY = M.CATEGORY_ID
+                             WHERE     b.is_del = '0'  AND b.flag != '0' AND b.flag != '7' and B.IS_PUBLIC like 1  and
+                                 b.news_tags LIKE '%SiteNews%' 
+                    <isNotEmpty prepend="and" property="createDateS">
+						       b.CREATE_DATE >=#createDateS#
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="createDateE">
+						b.CREATE_DATE<![CDATA[ <=#createDateE# ]]>
+					</isNotEmpty>
+					<isNotEmpty prepend="and" property="deptCategory">
+						<iterate property="deptCategory" open="(" close=")" conjunction="or">
+								 c.DEPT_CATEGORY=#deptCategory[]#
+						</iterate> 
+					</isNotEmpty>    
+					<isNotEmpty prepend="and" property="status">
+	                    c.dept_category like '%'||decode(#status#,'',c.dept_category,#status#)||'%'
+	                  </isNotEmpty>  ) 
+                      group by deptname)bb      ON aa.deptname = bb.deptname) b
+     				 RIGHT JOIN
+		               (SELECT dept_name, dept_category,SEQUENCE_NUM,dept_id
+		                  FROM sys_department s
+		                 WHERE s.is_del = '0'
+		                  <dynamic>
+		                    <isNotEmpty prepend="and" property="status">
+		                         s.dept_category like '%'||decode(#status#,'',s.dept_category,#status#)||'%'
+		                     </isNotEmpty>
+		                 </dynamic>
+		                 ) cc ON b.deptName = cc.dept_name                                 
+ORDER BY sequenceNum ASC  
+	</select>
+	<!-- 按照部门信息查询 网站信息考核统计报表信息-->
+	<select id="getSiteCheckReportByDept" parameterClass="Map"  resultClass="siteCheckReport">	
+	select deptCategory, sequenceNum, deptName, d.title AS title,innerCategory, outerCategory,
+         (case when outScore is not null then outScore+score else score end )as score,
+       (case when e.adoptType is not null then (d.adoptType ||',' || e.adoptType) else d.adoptType end )as adoptType
+       from (select  deptCategory,sequenceNum,deptName,title,news_id,innerCategory,outerCategory,adoptType,sum(SCORE) as score from(
+          SELECT dept_category AS deptCategory,  c.sequence_num AS sequenceNum,  c.dept_name AS deptName,
+               D.VIDEO_TITLE AS title, d.VIDEO_ID as news_id,  d.INNER_CATEGORY AS innerCategory,
+               d.OUTER_CATEGORY AS outerCategory,  SCORE,  code AS adoptType  FROM TEXT_CHECK_STANDARD a
+               RIGHT JOIN VIDEO_NEWS D ON d.TYPE LIKE '%' || a.code || '%'
+               JOIN sys_department C ON c.dept_id = d.ENTRY_DEPT_ID
+         WHERE d.is_del = '0' AND d.flag != '0' AND d.flag != '7' 
+          <isNotEmpty prepend="and" property="createDateS">
+							     d.CREATE_DATE >=#createDateS#
+								</isNotEmpty>
+								<isNotEmpty prepend="and" property="createDateE">
+								d.CREATE_DATE<![CDATA[ <=#createDateE# ]]>
+								</isNotEmpty>
+								<isNotEmpty prepend="and" property="deptCategory">
+								<iterate property="deptCategory" open="(" close=")" conjunction="or">
+								 c.DEPT_CATEGORY=#deptCategory[]#
+								</iterate> 
+								</isNotEmpty> 
+								 <isNotEmpty prepend="and" property="deptId">
+							     c.dept_id = #deptId#
+								</isNotEmpty>   )
+                                 group by deptCategory,sequenceNum,deptName,title,news_id,innerCategory,outerCategory,adoptType
+           UNION ALL
+            SELECT dept_category AS deptCategory, sequenceNum, dept_name AS deptName,news_title AS title,  news_id, innerCategory, outerCategory,     adoptType,
+              sum(score) as score               
+            FROM (SELECT dept_category,  c.dept_name,  score,  b.news_title,  b.news_id ,   a.code as adoptType,  c.sequence_num AS sequenceNum,
+                         M.CATEGORY_NAME AS innerCategory,  b.OUTER_CATEGORY AS outerCategory
+                    FROM TEXT_CHECK_STANDARD A
+                         JOIN text_news B ON b.news_tags LIKE '%SiteNews%'
+                         JOIN sys_department C ON c.dept_id = b.entry_dept
+                         JOIN text_category m ON B.CATEGORY = M.CATEGORY_ID
+                   WHERE     b.is_del = '0'
+                         AND b.flag != '0'
+                         AND b.flag != '7'
+                         AND a.code LIKE '%sendSite%'
+                          <isNotEmpty prepend="and" property="createDateS">
+                       	b.CREATE_DATE >=#createDateS#
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="createDateE">
+						b.CREATE_DATE<![CDATA[ <=#createDateE# ]]>
+						</isNotEmpty>
+						<isNotEmpty prepend="and" property="deptCategory">
+						<iterate property="deptCategory" open="(" close=")" conjunction="or">
+						c.DEPT_CATEGORY=#deptCategory[]#
+						</iterate> 
+						</isNotEmpty> 
+						 <isNotEmpty prepend="and" property="deptId">
+						  c.dept_id = #deptId#
+						</isNotEmpty>  )  
+						  GROUP BY dept_category, dept_name, news_title, sequenceNum, news_id,innerCategory,outerCategory,adoptType ) d                                                                                    
+                LEFT JOIN        
+                (  SELECT newsId,news_title,adoptType ,(select SCORE from TEXT_CHECK_STANDARD where code like '%isPublic%')*count(newsId)as outScore  FROM ( SELECT c.dept_name,    b.news_title,  b.news_id AS newsId ,
+                       (case when b.is_public like 1 then 'isPublic' else b.is_public end)as  adoptType
+                    FROM  text_news b
+                         JOIN sys_department C ON c.dept_id = b.entry_dept
+                          JOIN text_category m ON B.CATEGORY = M.CATEGORY_ID
+                   WHERE     b.is_del = '0'
+                         AND b.flag != '0'
+                         AND b.flag != '7'
+                          and B.IS_PUBLIC like 1 
+                          and b.news_tags LIKE '%SiteNews%'
+                          <isNotEmpty prepend="and" property="createDateS">
+	                       	b.CREATE_DATE >=#createDateS#
+							</isNotEmpty>
+							<isNotEmpty prepend="and" property="createDateE">
+							b.CREATE_DATE<![CDATA[ <=#createDateE# ]]>
+							</isNotEmpty>
+							<isNotEmpty prepend="and" property="deptCategory">
+							<iterate property="deptCategory" open="(" close=")" conjunction="or">
+							c.DEPT_CATEGORY=#deptCategory[]#
+							</iterate> 
+							</isNotEmpty> 
+							 <isNotEmpty prepend="and" property="deptId">
+							  c.dept_id = #deptId#
+							</isNotEmpty>    )
+                          GROUP BY newsId,news_title,adoptType
+                           )e
+                            ON d.news_id = e.newsId
+ORDER BY sequenceNum ASC    
+	</select>	
+	<!--查询网站信息计报表信息-->	
+	<select id="getSiteReportFormByDate"  parameterClass="Map"  resultClass="SiteReport">	
+			select bb.dept_category as deptCategory,bb.dept_name as deptName,
+			aa.neiwangtotal as allTotalCount,
+			(case when cc.waiwangtotal is not null then (aa.neiwangtotal*(select SCORE from TEXT_CHECK_STANDARD where code like '%sendSite%')+waiwangtotal*(select SCORE from TEXT_CHECK_STANDARD where code like '%isPublic%')) 
+			else aa.neiwangtotal*(select SCORE from TEXT_CHECK_STANDARD where code like '%sendSite%') end) as allTotalCountSorce,
+			dd.num as adoptNum,sequenceNum
+                 from 
+                 (select dept_name,count(news_title) as neiwangtotal
+                                 from (select t.news_title,s.category_name,t.dept_name from text_news t 
+                                 join text_category s
+                                 on T.CATEGORY=S.CATEGORY_ID 
+                                 WHERE  t.news_tags LIKE '%Site%' and t.is_del='0' and t.flag != '0'  and t.flag != '7'
+                                 and t.create_date between  to_date(#startDate# ,'yyyy-mm-dd HH24:mi:ss')  
+             					  and  to_date(#endDate# ,'yyyy-mm-dd HH24:mi:ss') 
+                                     ) 
+                                  group by dept_name) aa
+                 right join
+                 (SELECT  dept_category,dept_name,sequence_num as sequenceNum
+                               FROM  sys_department 
+                               where is_del='0' 
+                               <isNotEmpty prepend="and" property="status">
+			                    dept_category like '%'||decode(#status#,'',dept_category,#status#)||'%'
+			                  </isNotEmpty> 
+                               order by dept_category) bb
+                               on aa.dept_name=bb.dept_name
+                  left join           
+                 (select dept_name,count(news_title) as waiwangtotal
+                                 from (select t.news_title,s.category_name,t.dept_name from text_news t 
+                                 join text_category s
+                                 on T.CATEGORY=S.CATEGORY_ID 
+                                 WHERE  t.news_tags LIKE '%Site%' and t.is_del='0' and t.is_public='1' and t.flag != '7'
+                                 and t.create_date between  to_date(#startDate# ,'yyyy-mm-dd HH24:mi:ss')  
+             					  and  to_date(#endDate# ,'yyyy-mm-dd HH24:mi:ss') 
+                                     ) 
+                                  group by dept_name) cc
+                                  on bb.dept_name=cc.dept_name
+                   left join
+                    (select dept_category,dept_name,count(category_name) as num 
+                    from     (SELECT  d.dept_category,d.dept_name,s.category_name
+                               FROM text_category s 
+                               join text_dept_category n
+                                    ON s.category_id = n.category_id                  
+                               join sys_department d
+                                    on D.DEPT_ID=n.dept_id
+                                    where N.IS_DEL='0')
+                                    group by dept_category,dept_name ) dd
+                                    on bb.dept_name=dd.dept_name 
+                                    order by  sequenceNum asc              
+	
+	
+	</select>
+	
+	<select id="getSiteReportFormByDept"  parameterClass="Map"  resultClass="SiteReport">
+	select 	deptCategory,deptName,categoryName,reportCount,backCount,inNetCount,inNetCountSorce,outNetCount,
+			outNetCountSorce,addTotalSorce,sequenceNum
+			from
+				(select a.dept_category as deptCategory,a.dept_name as deptName,a.category_name as categoryName,sequenceNum,
+						bb.shangbao as reportCount,cc.tuihui as backCount,dd.neiwangcount as inNetCount,
+						(dd.neiwangcount*(select SCORE from TEXT_CHECK_STANDARD where code like '%sendSite%')) as inNetCountSorce,
+						ee.waiwangcount as outNetCount,(ee.waiwangcount*(select SCORE from TEXT_CHECK_STANDARD where code like '%isPublic%')) as outNetCountSorce,
+						(case when ee.waiwangcount is not null then ((dd.neiwangcount)*(select SCORE from TEXT_CHECK_STANDARD where code like '%sendSite%')+(ee.waiwangcount)*(select SCORE from TEXT_CHECK_STANDARD where code like '%isPublic%')) 
+						else (dd.neiwangcount*(select SCORE from TEXT_CHECK_STANDARD where code like '%sendSite%')) end) as addTotalSorce
+                     from
+                             (SELECT  d.dept_category,d.dept_name,s.category_name,d.sequence_num as sequenceNum
+                               FROM text_category s 
+                               join text_dept_category n
+                                    ON s.category_id = n.category_id                  
+                               join sys_department d
+                                    on D.DEPT_ID=n.dept_id
+                                    where N.IS_DEL='0') a
+                     left join   
+                          (select b.dept_name,b.category_name,count(news_title) as shangbao
+                          from
+                                (select t.news_title,s.category_name,t.dept_name from text_news t 
+                                  join text_category s
+                                     on T.CATEGORY=S.CATEGORY_ID 
+                                     WHERE  t.news_tags LIKE '%Site%' and t.is_del='0' and t.flag != '0'
+	                                 and t.create_date between  to_date(#startDate# ,'yyyy-mm-dd HH24:mi:ss')  
+             					  and  to_date(#endDate# ,'yyyy-mm-dd HH24:mi:ss') 
+                                     ) b
+                              group by  b.dept_name,b.category_name) bb    
+                                  on a.dept_name=bb.dept_name and a.category_name=bb.category_name 
+                     left join 
+                            (select dept_name,category_name,count(news_title) as tuihui
+                                 from (select t.news_title,s.category_name,t.dept_name from text_news t 
+                                         join text_category s
+                                         on T.CATEGORY=S.CATEGORY_ID 
+                                         WHERE  t.news_tags LIKE '%Site%' and t.is_del='0' and t.flag = '7'
+		                                and t.create_date between  to_date(#startDate# ,'yyyy-mm-dd HH24:mi:ss')  
+             					  and  to_date(#endDate# ,'yyyy-mm-dd HH24:mi:ss')  
+                                         ) 
+                                  group by dept_name,category_name) cc
+                                  on a.dept_name=cc.dept_name and a.category_name=cc.category_name
+                      left join
+                            (select dept_name,category_name,count(news_title) as neiwangcount
+                                 from (select t.news_title,s.category_name,t.dept_name from text_news t 
+                                         join text_category s
+                                         on T.CATEGORY=S.CATEGORY_ID 
+                                         WHERE  t.news_tags LIKE '%Site%' and t.is_del='0' and t.flag != '0' and t.flag != '7'
+		                                 and t.create_date between  to_date(#startDate# ,'yyyy-mm-dd HH24:mi:ss')  
+             					  and  to_date(#endDate# ,'yyyy-mm-dd HH24:mi:ss')  
+                                         ) 
+                                  group by dept_name,category_name) dd
+                                  on a.dept_name=dd.dept_name and a.category_name=dd.category_name            
+                       left join
+                             (select dept_name,category_name,count(news_title) as waiwangcount
+                                 from (select t.news_title,s.category_name,t.dept_name from text_news t 
+                                         join text_category s
+                                         on T.CATEGORY=S.CATEGORY_ID 
+                                         WHERE  t.news_tags LIKE '%Site%' and t.is_del='0' and is_public='1' and t.flag != '0' and t.flag != '7'
+                                         and t.create_date between  to_date(#startDate# ,'yyyy-mm-dd HH24:mi:ss')  
+             					  and  to_date(#endDate# ,'yyyy-mm-dd HH24:mi:ss')   
+                                         ) 
+                                  group by dept_name,category_name) ee
+                                  on a.dept_name=ee.dept_name and a.category_name=ee.category_name           
+                       order by sequenceNum asc) 
+		<!-- where deptName like '%'||#deptName#||'%' -->
+		<dynamic>
+			<isNotEmpty prepend="where" property="deptName">
+			                    deptName like '%'||decode(#deptName#,'',deptName,#deptName#)||'%'
+			</isNotEmpty>
+		</dynamic>
+	
+	</select>
+	
+	<!--查询台账报表信息  20140702 -->	
+	<select id="getAccountReportByDept"  parameterClass="Map"  resultClass="AccountReport">
+	    select 
+			  video_title as title ,to_char(create_date,'yyyy-mm-dd ') as entryDate ,
+		      adopt_type as adoptType ,dept_name as deptName ,video_id as gi_id,
+		      dept_category as deptCategory,sequenceNum
+		      from (
+		            select  dept_name , dept_category , video_id ,video_title,type as adopt_type,g.create_date as create_date,code,score,d.sequence_num as sequenceNum
+		            from sys_department d join video_news g on d.dept_name like g.entry_dept_name 
+		            join text_check_standard c  on g.type like '%'||c.code||'%' 
+		            where g.is_del='0' 
+		             <dynamic>
+					            <isNotEmpty prepend="and" property="deptName">
+					               dept_name like '%'||decode(#deptName#,'',dept_name,#deptName#)||'%'
+					            </isNotEmpty>
+					             <isNotEmpty>
+	                                 <isNotEmpty prepend="and" property="startDate">
+	                                   g.create_date >=#startDate# 
+	                                   </isNotEmpty>
+	                                   <isNotEmpty prepend="and" property="endDate">
+	                                  g.create_date<![CDATA[ <=#endDate# ]]>
+	                               </isNotEmpty>
+	                               
+	                        </isNotEmpty>
+					      </dynamic>
+						
+		            
+		        ) 
+		        group by video_id ,video_title,adopt_type,dept_name ,dept_category,create_date ,sequenceNum 
+        
+      union 
+        select 
+		      gi_title as title ,to_char(entry_date ,'yyyy-mm-dd ') as entryDate,
+		      adopt_type as adoptType ,dept_name as deptName ,gi_id,
+		       dept_category as deptCategory,sequenceNum
+		      from (
+		            select  dept_name , dept_category , news_id , gi_id ,gi_title , adopt_type ,entry_date,code,score,d.sequence_num as sequenceNum
+		            from sys_department d join text_gov_info g on g.entry_dept LIKE d.dept_name || '%' 
+		            join text_check_standard c  on g.adopt_type like '%'||c.code||'%' 
+		            where g.is_del='0' 
+		                  <dynamic>
+					            <isNotEmpty prepend="and" property="deptName">
+					               dept_name like '%'||decode(#deptName#,'',dept_name,#deptName#)||'%'
+					            </isNotEmpty>
+			                <isNotEmpty>
+	                                 <isNotEmpty prepend="and" property="startDate">
+	                                   g.entry_date >= #startDate# 
+	                                   </isNotEmpty>
+	                                   <isNotEmpty prepend="and" property="endDate">
+	                                   g.entry_date<![CDATA[ <=#endDate# ]]>
+	                               </isNotEmpty>
+	                               
+	                        </isNotEmpty>
+					      </dynamic>
+		        ) 
+		        group by gi_id,gi_title,adopt_type,dept_name ,dept_category,entry_date ,sequenceNum
+     order by sequenceNum asc
+	</select> 
+	<select id="getAccountReportByDate"  parameterClass="Map"  resultClass="AccountReport">
+ select deptName as deptName,deptCategory as deptCategory, sum(adoptNum) as adoptNum, sum(totalPrice) as totalPrice,sequenceNum
+   from(select cc.dept_name as deptName,cc.dept_category as deptCategory,adoptNum,totalPrice,cc.SEQUENCE_NUM as sequenceNum from
+            (select 
+		      dept_name as deptName,dept_category as deptCategory, count(dept_name) as adoptNum, sum(reward) as totalPrice,sequenceNum
+		      from(
+		          select sum(reward)as reward, video_title ,type ,dept_name , dept_category,sequenceNum 
+		          from(
+		              select  dept_name , dept_category , video_id ,
+		               video_title , type ,g.create_date,score,reward,d.sequence_num as sequenceNum
+		               from sys_department d join video_news g on d.dept_name like g.entry_dept_name  
+		               join text_check_standard c  on g.type like '%'||c.code||'%' 
+		               where g.is_del='0'
+		               <dynamic>
+				               <isNotEmpty prepend="and" property="status">
+				                d.dept_category like '%'||decode(#status#,'',d.dept_category,#status#)||'%'
+				               </isNotEmpty> 
+				                <isNotEmpty>
+		                                 <isNotEmpty prepend="and" property="startDate">
+		                                   g.create_date >=#startDate# 
+		                                   </isNotEmpty>
+		                                   <isNotEmpty prepend="and" property="endDate">
+		                                   g.create_date<![CDATA[ <=#endDate# ]]>
+		                               </isNotEmpty>
+		                               
+		                        </isNotEmpty>
+		                 </dynamic>
+		              ) group by   video_title,type,dept_name ,dept_category ,sequenceNum
+		               order by dept_category,sequenceNum 
+		      )group by dept_name ,dept_category ,sequenceNum) bb
+       			RIGHT JOIN
+               (SELECT dept_name, dept_category,SEQUENCE_NUM
+                  FROM sys_department s
+                 WHERE s.is_del = '0'
+                 <dynamic>
+                    <isNotEmpty prepend="and" property="status">
+                         s.dept_category like '%'||decode(#status#,'',s.dept_category,#status#)||'%'
+                     </isNotEmpty>
+                 </dynamic>
+                 ) cc ON bb.deptName = cc.dept_name
+      union
+	         select cc.dept_name as deptName,cc.dept_category as deptCategory,adoptNum,totalPrice,cc.SEQUENCE_NUM as sequenceNum from
+	         (select
+	          dept_name as deptName,dept_category as deptCategory, count(dept_name) as adoptNum, sum(reward) as totalPrice,sequenceNum
+	             from(
+	          select sum(reward)as reward, gi_title ,adopt_type ,dept_name , dept_category ,gi_id,sequenceNum
+	          from(
+	              select  dept_name , dept_category , news_id , gi_id ,
+	               gi_title , adopt_type ,entry_date,score,reward,d.sequence_num as sequenceNum
+	               from sys_department d join text_gov_info g on g.entry_dept LIKE d.dept_name || '%' 
+	               join text_check_standard c  on g.adopt_type like '%'||c.code||'%' 
+	               where g.is_del='0'
+	               <dynamic>
+			               <isNotEmpty prepend="and" property="status">
+			                d.dept_category like '%'||decode(#status#,'',d.dept_category,#status#)||'%'
+			               </isNotEmpty> 
+	                <isNotEmpty>
+                                 <isNotEmpty prepend="and" property="startDate">
+                                   entry_date >= #startDate# 
+                                   </isNotEmpty>
+                                   <isNotEmpty prepend="and" property="endDate">
+                                   entry_date<![CDATA[ <=#endDate#]]>
+                               </isNotEmpty>
+                               
+                      </isNotEmpty>
+                     </dynamic>    
+	              ) group by  gi_id, gi_title,adopt_type,dept_name ,dept_category ,sequenceNum
+	               order by dept_category,dept_name  
+	      )group by dept_name ,dept_category,sequenceNum) bb
+	      RIGHT JOIN
+               (SELECT dept_name, dept_category,SEQUENCE_NUM
+                  FROM sys_department s
+                 WHERE s.is_del = '0'
+                 <dynamic>
+                    <isNotEmpty prepend="and" property="status">
+                         s.dept_category like '%'||decode(#status#,'',s.dept_category,#status#)||'%'
+                     </isNotEmpty>
+                 </dynamic>
+                 ) cc ON bb.deptName = cc.dept_name
+	 )
+      group by deptName,deptCategory,sequenceNum
+      order by sequenceNum asc
+	</select>
+</sqlMap>

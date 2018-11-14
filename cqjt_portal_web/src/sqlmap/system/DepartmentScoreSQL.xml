@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--新增DepartmentScore.sql   H2602975 zhpeng 20140616-->
+<sqlMap namespace="DeptScore">
+  <insert id="insertDeptScore" parameterClass="deptScore">
+	   	insert into text_dept_score(
+	   	  score_id, score_info, dept_id, 
+		  dept_name, news_id, score,
+		  score_type, create_date, 
+		  update_date
+		) values (
+		  #scoreId#,#scoreInfo#,#deptId#,
+		  #deptName#, #newsId#,#score#, #scoreType#,
+		  to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'),
+		  to_date(#updateDate#,'yyyy-MM-dd hh24:mi:ss')
+		) 
+  </insert>
+
+  <update id="updateDeptScore" parameterClass="deptScore">
+        update text_dept_score set score_info=#scoreInfo#,
+        score=#score#, score_type=#scoreType#,
+        update_date=to_date(#updateDate#,'yyyy-MM-dd hh24:mi:ss')
+        where news_id=#newsId#
+  </update>
+   
+  <select id="getDeptScoreList" parameterClass="Map" resultClass="deptScore">
+			select score_id as scoreId, score_info as scoreInfo, dept_id as deptId, 
+		    dept_name as deptName, news_id as newsId, score, score_type as scoreType,
+			to_char(create_date ,'yyyy-MM-dd hh24:mi:ss')as createDate,
+			to_char(update_date ,'yyyy-MM-dd hh24:mi:ss')as updateDate 
+			from text_dept_score where is_del='0'
+		<dynamic>
+		   <isNotEmpty prepend="and" property="deptId">
+			 dept_id = #deptId# 
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="deptName">
+			 dept_name like '%'||decode(#deptName#,'',dept_name,#deptName#)||'%'
+		   </isNotEmpty>
+	   </dynamic> 
+	     order by create_date desc nulls last
+  </select>
+
+  <select id="getDeptScoreDetail" parameterClass="java.lang.String" resultClass="deptScore">
+			select score_id as scoreId, score_info as scoreInfo, dept_id as deptId, 
+		    dept_name as deptName, news_id as newsId, score, score_type as scoreType,
+			to_char(create_date ,'yyyy-MM-dd hh24:mi:ss')as createDate,
+			to_char(update_date ,'yyyy-MM-dd hh24:mi:ss')as updateDate 
+			from text_dept_score where is_del='0' and news_id = #newsId#
+  </select>
+
+	<!--按照部门查询得分总和-->
+	<select id="getScoreSumList" parameterClass="Map" resultClass="deptScore">
+			 select sum(score)as score,dept_id as deptId,dept_name as deptName,score_type as scoreType
+            from text_dept_score where  is_del='0' 
+            <isNotEmpty prepend="and" property="scoreType">
+		      score_type =#scoreType#
+		   </isNotEmpty>
+            <isNotEmpty prepend="and" property="createDateS">
+		      create_date >=#createDateeS#
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="createDateE">
+		      create_date<![CDATA[ <=#createDateE# ]]>
+		   </isNotEmpty>
+            group  by dept_id,dept_name,score_type
+  </select>
+
+	<delete id="delDeptScore"  parameterClass="java.lang.String">
+   		delete from TEXT_DEPT_SCORE where NEWS_ID = #newsId#
+	</delete>
+
+	<delete id="delbyScoreDeptScore"  parameterClass="java.lang.String">
+   		delete from TEXT_DEPT_SCORE where NEWS_ID = #newsId# and  score_info in ('pubtypedynamic','pubTypewordinfo')
+	</delete>
+
+	<!--按照部门查询得分总和-->
+	<select id="queryScoreByCodeAndNewsId" parameterClass="Map" resultClass="deptScore">
+			 select NEWS_ID newsId,dept_id as deptId,dept_name as deptName,score_type as scoreType
+            from text_dept_score where  is_del='0' 
+            <isNotEmpty prepend="and" property="scoreType">
+		      score_type =#scoreType#
+		   </isNotEmpty>
+            <isNotEmpty prepend="and" property="newsId">
+		      NEWS_ID >=#newsId#
+		   </isNotEmpty>
+  </select>
+
+</sqlMap>

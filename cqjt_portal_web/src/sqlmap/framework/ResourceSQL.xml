@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="AuthorityResource">
+	
+	<select id="checkAuthority" parameterClass="java.util.HashMap"
+		resultClass="Menu">
+		SELECT B.MENU_VALUE FROM SYS_ROLE_MENU A
+		JOIN SYS_MENU B ON A.MENU_ID=B.MENU_ID AND B.IS_DEL = '0'
+		WHERE A.AUTHORITY='1' AND A.ROLE_ID = #roleID# 
+		AND B.MENU_VALUE like '%'||#url#||'%'
+	</select>
+</sqlMap>

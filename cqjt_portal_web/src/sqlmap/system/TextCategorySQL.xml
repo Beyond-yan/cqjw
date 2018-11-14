@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--栏目管理     20140703 gyf-->
+<sqlMap namespace="Column">
+	<!--获取所有 -->
+	<select id="getColumnAll" parameterClass="map" resultClass="textCategory">
+			select category_id as categoryId,category_name as categoryName,
+				outsite_program as outsiteProgram, is_outsite as isOutsite,
+				to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate,create_by as createBy
+			from text_category
+			where is_del=#isDel#
+		<dynamic>
+			<isNotEmpty prepend="and" property="categoryName">
+				 category_name like '%'||#categoryName#||'%'	
+			</isNotEmpty> 
+			<isNotEmpty prepend="and" property="startDate">
+		      	 create_date >=#startDate#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endDate">
+			     create_date  
+			<![CDATA[  <=#endDate#]]>
+			</isNotEmpty>
+		</dynamic>
+			order by create_date desc
+	</select>
+
+	<!--根据Id查询-->
+	<select id="getColumnById" parameterClass="Long" resultClass="textCategory">
+			select category_id as categoryId,category_name as categoryName,
+				outsite_program as outsiteProgram,is_outsite as isOutsite,
+				to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate,create_by as createBy
+			from text_category
+			where is_del='0' and category_id=#categoryId#
+	</select> 
+	<!--更新 删除-->
+	<update id="updateColumn" parameterClass="textCategory">
+			update text_category 
+			set is_del=#isDel#
+			where category_id=#categoryId#
+	</update>
+
+	<!--新增 -->
+	<insert id="addColumn" parameterClass="textCategory" >
+			insert into text_category (
+				category_id, category_name, is_del, is_outsite,
+				create_date, create_by,outsite_program
+			) values (
+				sq_text_category.NEXTVAL, #categoryName#, '0', #isOutsite#,
+				to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'), #createBy#,#outsiteProgram#)
+	</insert>
+		
+		
+		
+	<!-- 外网与内网栏目对应关系  zhangpeng 20140709-->
+		
+	<!--查询功能sql-->
+	<select id="queryCategoryRelationList" parameterClass="Map" resultClass="categoryRelation">
+			select relation_id as relationId, inner_category as innerCategory,
+				outer_category as outerCategory, inner_id as innerId,outer_id as outerId,
+				to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate,create_user as createUser,
+				is_public as isPublic
+			from text_category_relation
+			where is_del=0 
+			<dynamic>
+			<isNotEmpty prepend="and" property="innerId">
+				 inner_id =#innerId#
+			</isNotEmpty>
+			</dynamic>
+			order by create_date desc
+	</select>
+		
+	<!--新增功能sql -->
+	<insert id="insertCategoryRelation" parameterClass="categoryRelation" >
+			insert into text_category_relation (
+				relation_id, inner_category,
+				outer_category, inner_id, outer_id,
+				create_date,
+				create_user,is_public
+			) values (
+				#relationId#, #innerCategory#, #outerCategory#, #innerId#,#outerId#,
+				to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'), #createUser#,#isPublic#)
+	</insert>
+		
+	<!--更新sql -->
+	<update id="updateCategoryRelation" parameterClass="categoryRelation" >
+			update text_category_relation set 
+				relation_id=#relationId#,
+				inner_category=#innerCategory#,
+				outer_category=#outerCategory#,
+				inner_id=#innerId#,
+				outer_id=#outerId#,
+				is_public=#isPublic#
+				where relation_id=#relationId#
+	</update>
+		
+	<!--逻辑删除sql -->
+	<update id="deleteCategoryRelation" parameterClass="java.lang.String" >
+			update text_category_relation set is_del='1'
+			where relation_id=#relationId# 
+	</update>
+	<!--物理删除sql -->
+	<delete id="deleteCategoryRelationDetail" parameterClass="java.lang.String" >
+			delete text_category_relation 
+			where relation_id=#relationId# 
+	</delete>
+		 
+	<!--编辑返回一条数据的sql  wcf-->
+	<select id="getRelationDetail" parameterClass="java.lang.String" resultClass="categoryRelation">
+			select relation_id as relationId, inner_category as innerCategory,
+				outer_category as outerCategory, inner_id as innerId,outer_id as outerId,
+				to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate,create_user as createUser,
+				is_public as isPublic
+			from text_category_relation
+			where is_del=0 and relation_id =#relationId#
+			order by create_date desc
+	</select>
+	
+	<update id="updateTextCategoryById" parameterClass="textCategory">
+			update text_category 
+		<dynamic prepend="set">
+		 <isNotNull  prepend="," property="isOutsite">
+	   		is_outsite = #isOutsite#
+		 </isNotNull>
+		 <isNotNull prepend="," property="categoryName">
+		   	category_name=#categoryName#
+		 </isNotNull>
+		 <isNotNull prepend="," property="outsiteProgram">
+			outsite_program = #outsiteProgram#
+		 </isNotNull>
+		 where category_id=#categoryId#
+		</dynamic>
+			
+	</update>
+	
+	<!--获取未选中的栏目categoryId-->
+	 <select  id="getColunmUnSelect" parameterClass="Map" resultClass="textCategory">
+	 	select category_id as categoryId,category_name as categoryName,outsite_program as outsiteProgram,is_outsite as isOutsite,
+                to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate,create_by as createBy
+  from TEXT_CATEGORY where CATEGORY_ID not in(select CATEGORY_ID from COLUNMCHOOSE where DEMOID=#categoryId#) and IS_DEL ='0'
+  	<dynamic>
+         	<isNotEmpty prepend="and" property="categoryName">
+         		CATEGORY_NAME like '%'||decode(#categoryName#,'',CATEGORY_NAME,#categoryName#)||'%'
+         	</isNotEmpty>
+         	 <isNotEmpty prepend="and" property="startDate">
+		      	 create_date >=#startDate#
+			   </isNotEmpty>
+			   <isNotEmpty prepend="and" property="endDate">
+			     create_date  
+			     <![CDATA[  <=#endDate#]]>
+			   </isNotEmpty>
+         </dynamic>
+	 </select>
+
+	<!--获取已经选中的栏目DEMOID-->
+	 <select  id="getColunmSelect" parameterClass="Map" resultClass="textCategory">
+	 	select cc.category_id as categoryId,category_name as categoryName,outsite_program as outsiteProgram,is_outsite as isOutsite,
+        to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate,create_by as createBy from COLUNMCHOOSE  cc 
+        join TEXT_CATEGORY tc on TC.CATEGORY_ID=CC.CATEGORY_ID and   TC.IS_DEL='0' 
+        <dynamic>
+         	<isNotEmpty prepend="and" property="categoryId">
+         		cc.DEMOID=#categoryId#
+         	</isNotEmpty>
+         </dynamic>
+	 </select>
+	 <!--COLUNMCHOOSE表新增数据 -->
+	<insert id="insertSelectColumn" parameterClass="textCategory" >
+			insert into COLUNMCHOOSE (DEMOID, category_id) values (#id#,#categoryId#)
+	</insert>
+	 <!--COLUNMCHOOSE表新增删除 -->
+	 <delete id="deleteSelectColumn" parameterClass="textCategory" >
+			delete COLUNMCHOOSE  where DEMOID=#id# and CATEGORY_ID=#categoryId# 
+	</delete>
+</sqlMap>

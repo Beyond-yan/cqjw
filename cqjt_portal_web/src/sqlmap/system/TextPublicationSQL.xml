@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--刊物信息sql H2602975 zhangpeng 20140604-->
+<sqlMap namespace="TextPublication">
+		<!--  添加pub_id=#pubId#字段H2602965 2014.06.06-->
+		<select id="getPubList" parameterClass="String" resultClass="TextPublication">
+			select pub_id as pubId ,pub_name as pubName,
+			pub_code as pubCode,create_user as createUser,
+			to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate 
+			from text_publication where is_del='0' and pub_id=#pubId#
+		</select>
+		<!--查询--> <!--首页每日信息查询-->
+		<select id="queryPubInfoList" parameterClass="Map" resultClass="TextPublication">
+			select pub_id as pubId ,pub_name as pubName,
+			pub_code as pubCode,create_user as createUser,IS_PUBLIC as isPublic,
+			to_char(create_date ,'yyyy-MM-dd hh24:mi:ss')as createDate 
+			from text_publication where is_del='0'
+		<dynamic>
+		   <isNotEmpty prepend="and" property="pubName">
+			 pub_name like '%'||decode(#pubName#,'',pub_name,#pubName#)||'%'	
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="createUser">
+			 create_user like '%'||decode(#createUser#,'',create_user,#createUser#)||'%'
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="createDateS">
+		     create_date >=#createDateS#
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="createDateE">
+		     create_date  
+		      <![CDATA[  <=#createDateE#]]>
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="isPublic">
+		     IS_PUBLIC  = #isPublic#
+		   </isNotEmpty>
+	   </dynamic> 
+	     order by create_date desc nulls last
+		</select>
+		
+		
+		<insert id="insertPubInfo" parameterClass="TextPublication">
+		   	insert into text_publication(
+		   	  pub_id,pub_code,pub_name, 
+			  create_user,create_date, 
+			  update_user,update_date,
+			  is_del,IS_PUBLIC
+			) values (
+			  #pubId#,#pubCode#,#pubName#,
+			  #createUser#,to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss'),
+			  #updateUser#,to_date(#updateDate#,'yyyy-MM-dd hh24:mi:ss'),
+			  #isDel#,#isPublic#
+			) 
+	   </insert>
+	   <!--编辑更新-->
+	    <update id="updatePubInfo"  parameterClass="TextPublication" >
+	   	  update text_publication set
+		  is_del='0'
+		  <dynamic>
+			   <isNotEmpty prepend="," property="isPublic">
+				 IS_PUBLIC=#isPublic#,
+				 pub_code=#pubCode#, 
+				 pub_name=#pubName#	
+			   </isNotEmpty>
+			   <isEmpty  prepend="," property="isPublic">
+			   		  pub_code=#pubCode#, 
+				      pub_name=#pubName#, 
+					  create_user=#createUser#,
+					  update_date=to_date(#updateDate#,'yyyy-MM-dd hh24:mi:ss'),
+					  update_user=#updateUser#
+			   </isEmpty>
+	  	  </dynamic> 
+		  where pub_id = #pubId#
+	   </update>
+	   <!--逻辑删除文字信息 -->
+	   <update id="deletePubInfo" parameterClass="TextPublication">
+	   	  update text_publication
+	   	  set is_del='1'
+	   	  where pub_id = #pubId#
+	   </update>
+	   
+	   <!-- 物理删除文字信息 -->
+	   <delete id="deletePublication" parameterClass="java.lang.String">
+	   	  delete from text_publication where pub_id = #pubId#
+	   </delete>
+		
+		 <!-- 根据pubid查询被删除的信息 -->
+		<select id="getPubByPubId" parameterClass="String" resultClass="TextPublication">
+			select pub_id as pubId ,pub_name as pubName,
+			pub_code as pubCode,create_user as createUser,
+			to_char(create_date ,'yyyy-MM-dd hh24:mi:ss') as createDate 
+			from text_publication where is_del='1' and pub_id=#pubId#
+		</select>
+		<!--彻底删除   2014.09.03 -->
+	   <delete id="deleteTextNews" parameterClass="TextPublication">
+	   	delete from text_publication where pub_id=#pubId#
+	   </delete> 
+	   <delete id="deleteTextNewsById" parameterClass="String">
+	   	delete from text_publication where pub_id=#id#
+	   </delete> 
+	   <!--  查询H2602965 2014.06.06-->
+		<select id="getPub" parameterClass="String" resultClass="TextPublication">
+			select * from text_publication where  pub_id=#pubId#
+		</select>
+			
+</sqlMap>

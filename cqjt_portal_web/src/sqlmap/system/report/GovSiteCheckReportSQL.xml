@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+ PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+ "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="govSiteCheckReport">
+	<sql id="sql_column">
+		reportId,deptId,deptName,deptCategoryName,govScore,govTotalScore,siteScore,siteTotalScore,reportDate
+	</sql>
+   	<!--查询 -->	
+   	<select id="govSiteCheckReportList"  parameterClass="Map"  resultClass="govSiteCheckReport">
+   		SELECT <include refid="sql_column"/>
+	   	FROM PORTL_GOV_SITE_CHECK_REPORT gs 
+	   	WHERE 1=1
+ 		<dynamic>
+		    <isNotEmpty prepend="and" property="beginDate">
+		      reportDate >=#beginDate#
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="endDate">
+		      reportDate  <![CDATA[  <=#endDate#]]>
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="category">
+		      deptCategoryName  in ($category$)
+		   </isNotEmpty>
+		   
+	   </dynamic>
+	   order by reportId nulls last
+   	</select>
+   	<select id="queryGovSiteCheckReportStat"  parameterClass="Map"  resultClass="govSiteCheckReport">
+   		SELECT dept.DEPT_ID deptId,DEPT.DEPT_CATEGORY DEPTCATEGORYNAME,DEPT.DEPT_NAME DEPTNAME,STAT.GOVSCORE,STAT.GOVTOTALSCORE,STAT.SITESCORE,STAT.SITETOTALSCORE FROM SYS_DEPARTMENT dept  JOIN (
+		SELECT gs.DEPTID,SUM(GS.GOVSCORE) GOVSCORE,SUM(GS.GOVTOTALSCORE) GOVTOTALSCORE,SUM(gs.SITESCORE) SITESCORE,SUM(GS.SITETOTALSCORE) SITETOTALSCORE 
+		FROM PORTL_GOV_SITE_CHECK_REPORT gs 
+		WHERE 1=1 
+		
+ 		<dynamic>
+		    <isNotEmpty prepend="and" property="beginDate">
+		       GS.REPORTDATE >= #beginDate# 
+		   </isNotEmpty>
+		   <isNotEmpty prepend="and" property="endDate">
+		  	 GS.REPORTDATE <![CDATA[  < #endDate#]]>
+		   </isNotEmpty>
+	   	</dynamic>
+	   	GROUP BY GS.DEPTID ) stat ON DEPT.DEPT_ID = STAT.DEPTID WHERE DEPT.DEPT_ID <![CDATA[  <>]]>'441' 
+	   	<dynamic>
+	   		<isNotEmpty prepend="and" property="category">
+		      DEPT.DEPT_CATEGORY IN ($category$)
+		   </isNotEmpty>
+		</dynamic>
+	   	ORDER BY dept.SEQUENCE_NUM
+   	</select>
+   
+   	<insert id="insertGovSiteCheckReport" parameterClass="govSiteCheckReport">
+   		insert into PORTL_GOV_SITE_CHECK_REPORT(
+   		<include refid="sql_column"/>
+		) values (
+	 	#reportId#,#deptId#,#deptName#,
+	  	#deptCategoryName#,#govScore#,#govTotalScore#,
+	  	#siteScore#,#siteTotalScore#,#reportDate#
+		) 
+   	</insert> 	 
+   	<!--更新  -->
+	<update id="updateGovCheckReport" parameterClass="govSiteCheckReport">
+			update PORTL_GOV_SITE_CHECK_REPORT 
+			set govScore = #govScore#,govTotalScore=#govTotalScore#
+			where deptId=#deptId# and reportDate = #reportDate#
+	</update>
+	<update id="updateSiteCheckReport" parameterClass="govSiteCheckReport">
+			update PORTL_GOV_SITE_CHECK_REPORT 
+			set siteScore = #siteScore#,siteTotalScore=#siteTotalScore#
+			where deptId=#deptId# and reportDate = #reportDate#
+	</update>
+		
+	
+</sqlMap>

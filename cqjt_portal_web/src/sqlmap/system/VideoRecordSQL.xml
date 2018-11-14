@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+ PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+ "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="VideoRecord">
+   <!--根据videoId查询资料-->	
+   <select id="getVideoByVideoId"  parameterClass="String"  resultClass="videoRecord">
+	   select video_id as videoId, 
+		  update_user as updateUser,REJECT_REASON as rejectReason,
+		   flag ,
+		 to_char(update_date ,'yyyy-MM-dd hh24:mi:ss') as updateDate
+	    from  video_record where  video_id=#videoId#
+	    and flag is not null
+	   order by update_date desc nulls last
+   </select>
+   <!--插入视频记录资料-->
+   <insert id="insertVideo" parameterClass="videoRecord">
+   	insert into video_record(
+   	  vr_id,video_id,update_date,
+	  update_user, REJECT_REASON,
+	  flag
+	) values ( 
+	  #vrId#, #videoId#,to_date(#updateDate#,'yyyy-MM-dd hh24:mi:ss'),
+	  #updateUser#,#rejectReason#,
+	  #flag# 
+	) 
+   </insert> 	 
+</sqlMap>

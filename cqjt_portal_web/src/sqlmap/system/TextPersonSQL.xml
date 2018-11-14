@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+	 PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+	 "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="TextPerson">
+
+	<select id="getTextPersonList" parameterClass="Map" resultClass="textPerson">
+		select a.* from (
+		SELECT
+		n.person_id AS personId,
+		n.person_title AS
+		personTitle,
+		n.sub_person_title AS subpersonTitle,
+		n.person_content AS
+		personContent,
+		n.entry_user AS entryUser,
+		TO_CHAR (
+		n.entry_date,
+		'yyyy-MM-dd hh24:mi:ss'
+		) AS entryDate,
+		n.is_del AS isDel,
+		n.flag,
+		TO_CHAR (
+		n.create_date,
+		'yyyy-MM-dd hh24:mi:ss'
+		) AS createDate,
+		n.create_by AS createBy,
+		n.entry_dept AS entryDept,
+		n.dept_name AS deptName,
+		n.text_num AS textNum,
+		n.pub_dapt AS pubDapt,
+		n.pub_date AS pubDate,
+		n.subject_cat AS subjectCat,
+		n.index_num AS indexNum,
+		n.subject_words AS subjectWords,
+		n.appoint_cat AS appointCat,
+		n.pub_user AS pubUser
+		FROM
+		text_person n
+		where n.is_del=#isDel#
+		<dynamic>
+			<isNotEmpty prepend="and" property="PersonTitle">
+		      n.person_title = #PersonTitle#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="appointCat">
+		      n.appoint_cat = #appointCat#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="personTitle">
+				n.person_title like
+				'%'||decode(#personTitle#,'',n.person_title,#personTitle#)||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryUser">
+				n.entry_user like
+				'%'||decode(#entryUser#,'',n.entry_user,#entryUser#)||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateS">
+				n.PUB_DATE
+				>=#entryDateS#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateE">
+				n.PUB_DATE<![CDATA[ <=#entryDateE# ]]>
+			</isNotEmpty>
+		</dynamic>
+		<dynamic>
+			order by n.pub_date desc
+		</dynamic>
+		) a where 1=1
+		<dynamic>
+			<isNotEmpty prepend="and" property="startRow">
+				rownum >= #startRow#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="endRow">
+			<![CDATA[ rownum <= #endRow# ]]>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<insert id="insertTextPerson" parameterClass="textPerson">
+		INSERT INTO
+		text_person
+		(person_id,person_title,sub_person_title,person_content,entry_user,entry_date,is_del,
+		flag,create_date,create_by,entry_dept,dept_name,TEXT_NUM,PUB_DAPT,PUB_DATE,SUBJECT_CAT,INDEX_NUM,SUBJECT_WORDS,
+		APPOINT_CAT,PUB_USER
+		) VALUES
+		(#personId#,#personTitle#,#subPersonTitle#,#personContent#,#entryUser#,#entryDate#,#isDel#,#flag#,
+		TO_DATE (#createDate#,'yyyy-MM-dd
+		hh24:mi:ss'),#createBy#,#entryDept#,#deptName#,#textNum#,#pubDapt#,
+		TO_DATE (#pubDate#,'yyyy-MM-dd
+		hh24:mi:ss'),#subjectCat#,#indexNum#,#subjectWords#,#appointCat#,#pubUser#)
+	</insert>
+
+
+	<delete id="deleteTextPerson" parameterClass="String">
+		delete from
+		text_person where person_id = #PersonId#
+	</delete>
+
+	<select id="getTextPersonDetail" parameterClass="java.lang.String"
+		resultClass="textPerson">
+		SELECT
+		n.person_id AS personId,
+		n.person_title AS
+		personTitle,
+		n.sub_person_title AS subpersonTitle,
+		n.person_content AS
+		personContent,
+		n.entry_user AS entryUser,
+		TO_CHAR (
+		n.entry_date,
+		'yyyy-MM-dd hh24:mi:ss'
+		) AS entryDate,
+		n.is_del AS isDel,
+		n.flag,
+		TO_CHAR (
+		n.create_date,
+		'yyyy-MM-dd hh24:mi:ss'
+		) AS createDate,
+		n.create_by AS createBy,
+		n.entry_dept AS entryDept,
+		n.dept_name AS
+		deptName,
+		n.text_num AS textNum,
+		n.pub_dapt AS pubDapt,
+		n.pub_date AS
+		pubDate,
+		n.subject_cat AS subjectCat,
+		n.index_num AS indexNum,
+		n.subject_words AS subjectWords,
+		n.appoint_cat AS appointCat,
+		n.pub_user AS pubUser
+		FROM
+		text_person n
+		WHERE
+		n.person_id = #PersonId#
+	</select>
+
+	<update id="updateTextPerson" parameterClass="textPerson">
+		update text_person
+		<dynamic prepend="set">
+			<isNotNull prepend="," property="personTitle">
+				person_title=#personTitle#
+			</isNotNull>
+			<isNotNull prepend="," property="subPersonTitle">
+				sub_person_title=#subPersonTitle#
+			</isNotNull>
+			<isNotNull prepend="," property="personContent">
+				person_content=#personContent#
+			</isNotNull>
+			<isNotNull prepend="," property="entryUser">
+				ENTRY_USER=#entryUser#
+			</isNotNull>
+			<isNotNull prepend="," property="entryDate">
+				entry_date=#entryDate#
+			</isNotNull>
+			<isNotNull prepend="," property="isDel">
+				is_del=#isDel#
+			</isNotNull>
+			<isNotNull prepend="," property="flag">
+				flag=#flag#
+			</isNotNull>
+			<isNotNull prepend="," property="createDate">
+				create_date=to_date(#createDate#,'yyyy-MM-dd hh24:mi:ss')
+			</isNotNull>
+			<isNotNull prepend="," property="createBy">
+				create_by=#createBy#
+			</isNotNull>
+			<isNotNull prepend="," property="entryDept">
+				entry_dept=#entryDept#
+			</isNotNull>
+			<isNotNull prepend="," property="deptName">
+				dept_name=#deptName#
+			</isNotNull>
+			<isNotNull prepend="," property="textNum">
+				text_num=#textNum#
+			</isNotNull>
+			<isNotNull prepend="," property="pubDapt">
+				pub_dapt=#pubDapt#
+			</isNotNull>
+			<isNotNull prepend="," property="pubDate">
+				pub_date=to_date(#pubDate#,'yyyy-MM-dd hh24:mi:ss')
+			</isNotNull>
+			<isNotNull prepend="," property="subjectCat">
+				subject_cat=#subjectCat#
+			</isNotNull>
+			<isNotNull prepend="," property="indexNum">
+				index_num=#indexNum#
+			</isNotNull>
+			<isNotNull prepend="," property="subjectWords">
+				subject_words=#subjectWords#
+			</isNotNull>
+			<isNotNull prepend="," property="appointCat">
+				appoint_cat=#appointCat#
+			</isNotNull>
+			<isNotNull prepend="," property="pubUser">
+				pub_user=#pubUser#
+			</isNotNull>
+			where person_id = #personId#
+		</dynamic>
+	</update>
+
+
+
+</sqlMap>

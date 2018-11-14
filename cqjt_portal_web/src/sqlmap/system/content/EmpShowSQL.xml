@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--图片内容管理 20140714 H2603282 -->
+<sqlMap namespace="EmpShow">
+	<!--获取所有图片信息 -->
+	<select id="getAllEmpShow" parameterClass="map" resultClass="empShow">
+		select emp_id as empId,
+		emp_name as empName,
+		emp_post as empPost,
+		entry_user as entryUser,
+		to_char(entry_date ,'yyyy-MM-dd ') as
+		entryDate,
+		emp_desc as empDesc,
+		emp_url as empUrl,
+		approvaler as
+		approvaler ,
+		source as source,
+		flag as flag,
+		is_del as isDel,
+		dept_name as
+		deptName,
+		category_name as categoryName,
+		emp_sort as empSort
+		from
+		emp_show
+		where
+		is_del=#isDel#
+		<dynamic>
+			<isNotEmpty prepend="and" property="deptName">
+				dept_name = #deptName#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="categoryName">
+				category_name =
+				#categoryName#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="empName">
+				emp_name like
+				'%'||decode(#empName#,'',emp_name,#empName#)||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryUser">
+				entry_user like
+				'%'||decode(#entryUser#,'',entry_user,#entryUser#)||'%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateS">
+				entry_date
+				>=#entryDateS#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="entryDateE">
+				entry_date  
+		 <![CDATA[  <=#entryDateE#]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="flag">
+				<iterate property="flag" open="(" close=")" conjunction="or">
+					flag=#flag[]#
+				</iterate>
+			</isNotEmpty>
+		</dynamic>
+		order by to_number(emp_sort) asc, entry_date desc
+	</select>
+	<!--根据picId查询资料 -->
+	<select id="getEmpById" parameterClass="String" resultClass="empShow">
+		SELECT
+		emp_id AS empId,
+		emp_name AS empName,
+		emp_post AS empPost,
+		entry_user AS entryUser,
+		TO_CHAR (entry_date, 'yyyy-MM-dd ') AS
+		entryDate,
+		emp_desc AS empDesc,
+		emp_url AS empUrl,
+		approvaler AS
+		approvaler,
+		SOURCE AS SOURCE,
+		flag AS flag,
+		is_del AS isDel,
+		dept_name as
+		deptName,
+		category_name as categoryName,
+		emp_sort as empSort
+		FROM
+		emp_show
+		WHERE
+		is_del = '0'
+		AND emp_id = #empId#
+	</select>
+	<!--插入图片内容信息 -->
+	<insert id="insertEmp" parameterClass="empShow">
+		INSERT INTO emp_show (
+		emp_id,
+		emp_name,
+		emp_post,
+		entry_user,
+		entry_date,
+		emp_desc,
+		emp_url,
+		approvaler,
+		SOURCE,
+		flag,
+		is_del,
+		dept_name,
+		category_name,
+		emp_sort
+		)
+		VALUES
+		(
+		#empId#,
+		#empName#,
+		#empPost#,
+		#entryUser#,
+		TO_DATE (
+		#entryDate#,
+		'yyyy-MM-dd
+		hh24:mi:ss'
+		),
+		#empDesc#,
+		#empUrl#,
+		#approvaler#,
+		#source#,
+		#flag#,
+		#isDel#,
+		#deptName#,
+		#categoryName#,
+		#empSort#
+		)
+	</insert>
+	<!--更新图片资料 -->
+	<update id="updateEmp" parameterClass="empShow">
+		update emp_show
+		set
+		<dynamic>
+			<isNotEmpty property="isDel">
+				is_del=#isDel#
+			</isNotEmpty>
+			<isEmpty property="isDel">
+				emp_name=#empName#,
+				emp_post=#empPost#,
+				entry_user=#entryUser#,
+				emp_desc=#empDesc#,
+				flag=#flag#,
+				approvaler=#approvaler#,
+				emp_url=#empUrl#,
+				source=#source#,
+				dept_name=#deptName#,
+				category_name=#categoryName#,
+				emp_sort=#empSort#
+			</isEmpty>
+		</dynamic>
+		where emp_id=#empId#
+	</update>
+
+	<update id="updateEmpSort" parameterClass="Map">
+		update emp_show set emp_sort =#empSort#
+		where emp_id = #empId#
+	</update>
+
+</sqlMap>

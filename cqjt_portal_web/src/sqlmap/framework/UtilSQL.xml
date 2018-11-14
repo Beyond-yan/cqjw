@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="UtilSQL">
+
+	<!--绑定文档来源（异步获取） -->
+	<select id="getContentSourceList" resultClass="selectBean">
+		SELECT B.INFO_ID
+		value, B.INFO_NAME label
+		FROM TRAFFIC_BASE_TYPE_T a,
+		TRAFFIC_BASE_INFO_T b
+		WHERE A.TYPE_ID = B.TYPE_ID
+		AND A.TYPE_ID = 1
+		AND
+		A.IS_DEL = '0'
+		AND B.IS_DEL = '0'
+	</select>
+
+	<select id="getApproverList" resultClass="selectBean">
+		select a.user_no
+		value,a.user_name label
+		from TRAFFIC_USERS a
+		join TRAFFIC_USER_ROLE b
+		on
+		a.USER_ID = b.USER_ID
+		and a.ENABLED='1'
+		join TRAFFIC_ROLE c
+		on
+		b.role_id=c.role_id
+		where c.role_name='Approver'
+	</select>
+
+	<select id="getBaseDataList" resultClass="selectBean"
+		parameterClass="String">
+		SELECT B.INFO_ID as
+		value, B.INFO_NAME as label
+		FROM
+		TRAFFIC_BASE_TYPE_T a,
+		TRAFFIC_BASE_INFO_T b
+		WHERE A.TYPE_ID = B.TYPE_ID
+		AND A.TYPE_ID =
+		#typeID#
+		AND
+		A.IS_DEL = '0'
+		AND B.IS_DEL = '0'
+	</select>
+
+	<select id="getGeneralDataList" resultClass="selectBean"
+		parameterClass="java.util.Map">
+		SELECT $valueCol$ VALUE, $textCol$ label
+		FROM
+		$tableName$
+		WHERE IS_DEL = '0'
+	</select>
+</sqlMap>

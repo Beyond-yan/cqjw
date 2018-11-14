@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd 
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+		
+	<context:component-scan base-package="com.gdssoft">
+		<!-- <context:include-filter type="assignable" expression="com.gdssoft.core.tools.SystemContext"/>  -->
+	</context:component-scan>
+	
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+		p:prefix="/WEB-INF/pages/" p:suffix=".jsp" />
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list><ref bean="jsonHttpMessageConverter" /></list>
+		</property>
+	</bean>
+	<bean id="jsonHttpMessageConverter"
+		class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" />
+	
+	
+	<import resource="app-resources.xml"/>
+	<!--搜索引擎定时更新job-->
+	<import resource="app-job.xml"/>
+	
+	<bean id="propertyConfigurer1" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="order" value="1" />
+    	<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<property name="locations">
+			<list>
+				<value>classpath:webapp.properties</value>
+			</list>
+		</property>
+		<property name="fileEncoding">
+			<value>UTF-8</value>
+		</property>
+	</bean>
+	
+	
+	<!-- 配置哪些类的方法进行事务管理 -->
+	<aop:aspectj-autoproxy />
+	<aop:config>
+		<aop:advisor advice-ref="ibatisTxAdvice"
+			pointcut="execution(* com.gdssoft.cqjt.controller.console.GovTextNewsController.saveGovInfo(..))"
+			order="1" />
+		<aop:advisor advice-ref="ibatisTxAdvice"
+			pointcut="execution(* com.gdssoft.cqjt.controller.console.GovTextNewsController.mergeInformation(..))"
+			order="1" />
+
+	</aop:config>
+	<!-- 
+	<aop:aspectj-autoproxy />
+	<aop:config>
+		<aop:advisor advice-ref="ibatisTxAdvice"
+			pointcut="execution(* com.gdssoft.core.educloud.managerplatform.student.service..*.*(..))"
+			order="1" />
+		<aop:advisor advice-ref="ibatisTxAdvice"
+			pointcut="execution(* com.gdssoft.core.educloud.managerplatform.teacher.service..*.*(..))"
+			order="2" />
+		<aop:advisor advice-ref="ibatisTxAdvice"
+			pointcut="execution(* com.gdssoft.core.educloud.managerplatform.system.service..*.*(..))"
+			order="3" />
+		<aop:advisor advice-ref="ibatisTxAdvice"
+			pointcut="execution(* com.gdssoft.core.educloud.managerplatform.admin.service..*.*(..))"
+			order="4" />
+	</aop:config>
+	 -->
+	 
+	<!-- file upload -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="defaultEncoding" value="UTF-8"></property>
+		<property name="maxUploadSize" value="524288000"></property>
+	</bean>
+	
+</beans>
